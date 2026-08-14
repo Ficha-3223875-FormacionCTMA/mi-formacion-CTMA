@@ -11,21 +11,20 @@ class ReglasActividadTest {
     @Test
     fun probarValidacion() {
 
-        val actividad =
+        val actividad = ActividadFormativa(
+            id = 1,
+            titulo = "   ",
+            descripcion = null,
+            progreso = 50,
+            diasRestantes = 3,
+            prioridad = Prioridad.MEDIA
+        )
 
-            ActividadFormativa(
-                id = 1,
-                titulo = "",
-                descripcion = null,
-                progreso = 120,
-                diasRestantes = -1,
-                prioridad = Prioridad.ALTA
-            )
 
         val errores = ReglasActividad.validarActividad(actividad)
 
         println(errores)
-
+        println("Dias restantes totales ${actividad.diasRestantes} ")
         assertTrue(errores.isNotEmpty())
     }
 }

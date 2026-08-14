@@ -35,7 +35,7 @@ object ReglasActividad{
         actividades: List<ActividadFormativa>): List<ActividadFormativa> {//con ":" le indicamos que la almacene al ejecutar la funcion dentro del mismo objeto
         return actividades.filter {//Le decimos que retorne las actividades filtradas
             it.progreso < 100 &&//con el "it" le decimos que revise el elemento actual en este caso (que revise uno por uno el progreso < 100
-                    it.diasRestantes <= 2 // Ademas tambien que revise el elemento actual de diasRestantes cuando sean menores o iguales a 2
+                    it.diasRestantes <= 3 // Ademas tambien que revise el elemento actual de diasRestantes cuando sean menores o iguales a 2
         }
     }
     //Funcion para calcular el promedio del progreso total de todas las actividades
