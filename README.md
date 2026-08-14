@@ -53,4 +53,14 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ### Criterios no funcional medible
 
+Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
+
+**Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
+
+Este criterio es adecuado para el README porque no se queda en algo ambiguo como "la aplicación debe ser rápida".
+
+También podrían agregarse posteriormente otros criterios, como disponibilidad, seguridad o usabilidad, pero con uno medible ya se cumple el requisito.
+
 ### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## 3. Dependencia
