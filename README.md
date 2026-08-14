@@ -50,6 +50,41 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 * **Entonces** la actividad deberá almacenarse y estar disponible para los aprendices.
 
 ### Criterios de aceptacion por historia
+## Historias de usuario
+
+### Historia de usuario 1 — Consultar actividades
+
+**Como aprendiz**, quiero consultar mis actividades registradas para conocer la información y los recursos asociados a cada una.
+
+**Criterios de aceptación:**
+
+* **Dado que** el aprendiz ha iniciado sesión, **cuando** acceda a la pantalla principal, **entonces** deberá visualizar sus actividades registradas.
+* **Dado que** existen actividades registradas, **cuando** el aprendiz consulte una actividad, **entonces** deberá visualizar como mínimo su título, descripción y fecha de entrega.
+* **Dado que** una actividad contiene un enlace, **cuando** el aprendiz consulte dicha actividad, **entonces** deberá poder acceder al enlace correspondiente.
+
+---
+
+### Historia de usuario 2 — Registrar avance
+
+**Como aprendiz**, quiero actualizar el estado de mis actividades para llevar un seguimiento de mi progreso.
+
+**Criterios de aceptación:**
+
+* **Dado que** el aprendiz ha seleccionado una actividad, **cuando** cambie su estado a **"En progreso"**, **entonces** la aplicación deberá guardar y mostrar el nuevo estado.
+* **Dado que** una actividad se encuentra en progreso, **cuando** el aprendiz la marque como **"Completada"**, **entonces** la aplicación deberá actualizar y guardar el estado.
+* **Dado que** el aprendiz vuelva a consultar una actividad cuyo estado fue modificado, **cuando** acceda a ella, **entonces** deberá visualizar el último estado guardado.
+
+---
+
+### Historia de usuario 3 — Publicar actividades
+
+**Como instructor**, quiero registrar y publicar actividades para que los aprendices puedan consultar la información y los recursos correspondientes.
+
+**Criterios de aceptación:**
+
+* **Dado que** el instructor ha iniciado sesión, **cuando** registre una actividad con título, descripción y fecha de entrega, **entonces** la aplicación deberá almacenarla correctamente.
+* **Dado que** el instructor ha registrado una actividad, **cuando** agregue recursos o criterios de evaluación, **entonces** estos deberán quedar asociados a la actividad.
+* **Dado que** una actividad ha sido publicada, **cuando** un aprendiz consulte sus actividades, **entonces** deberá poder visualizar la información publicada por el instructor.
 
 ### Criterios no funcional medible
 
@@ -65,3 +100,14 @@ Son elementos externos o componentes de los que depende el funcionamiento del pr
 * **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
 * **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
 * **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
+Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
+
+**Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
+
+Este criterio es adecuado para el README porque no se queda en algo ambiguo como "la aplicación debe ser rápida".
+
+También podrían agregarse posteriormente otros criterios, como disponibilidad, seguridad o usabilidad, pero con uno medible ya se cumple el requisito.
+
+### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## 3. Dependencia
