@@ -48,3 +48,9 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 * **Dado** que el instructor ha iniciado sesión,
 * **Cuando** registre una nueva actividad con su descripción, fecha y criterios de evaluación,
 * **Entonces** la actividad deberá almacenarse y estar disponible para los aprendices.
+
+### Criterios de aceptacion por historia
+
+### Criterios no funcional medible
+
+### Identificacion de dependencias, supuestos y preguntas abiertas
