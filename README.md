@@ -52,6 +52,18 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ### Criterios no funcional medible
 
+### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## Dependencias y elementos externos
+
+Son elementos externos o componentes de los que depende el funcionamiento del proyecto.
+
+* **Android Studio:** para el desarrollo y ejecución de la aplicación.
+* **Kotlin y Android SDK:** para la construcción de la aplicación Android.
+* **Base de datos:** para almacenar usuarios, actividades, recursos, estados y criterios de evaluación.
+* **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
+* **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
+* **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
 Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
 
 **Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
