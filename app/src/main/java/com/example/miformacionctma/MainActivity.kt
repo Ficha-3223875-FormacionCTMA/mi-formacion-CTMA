@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
 import com.example.miformacionctma.domain.ReglasActividad
+import com.example.miformacionctma.ui.TarjetaActividad
 import com.example.miformacionctma.ui.theme.MiFormacionCTMATheme
 
 class MainActivity : ComponentActivity() {
@@ -29,7 +32,7 @@ class MainActivity : ComponentActivity() {
         val actividades = listOf(
             ActividadFormativa(
                 id = 1,
-                titulo = "",
+                titulo = "Fundamentos de Kotlin",
                 descripcion = "Aprender variables y funciones",
                 progreso = 100,
                 diasRestantes = -2,
@@ -63,7 +66,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MiFormacionCTMATheme {
-                PantallaInicio(resumen = resumen)
+                PantallaInicio(resumen = resumen, actividades = actividades)
             }
         }
     }
@@ -72,7 +75,9 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PantallaInicio(
     nombre: String = "Aprendiz",
-    resumen: String
+    resumen: String,
+
+    actividades: List<ActividadFormativa>
 ) {
     val scrollState = rememberScrollState()
 
@@ -101,6 +106,22 @@ fun PantallaInicio(
             text = resumen,
             style = MaterialTheme.typography.bodyMedium
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Sección nueva: tarjetas de actividad (Parte 1 y 2 de la práctica)
+        Text(
+            text = "Mis actividades",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            actividades.forEach { actividad ->
+                TarjetaActividad(actividad = actividad, onClick = {})
+            }
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -181,7 +202,12 @@ fun PantallaInicioPreview() {
             Total de actividades: 3
             Promedio de progreso: 53.3%
             Actividades urgentes: 1
-            """.trimIndent()
+            """.trimIndent(),
+            actividades = listOf(
+                ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
+                ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
+                ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
+            )
         )
     }
 }
