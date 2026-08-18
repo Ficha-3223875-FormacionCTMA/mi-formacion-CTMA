@@ -4,19 +4,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.miformacionctma.domain.ActividadFormativa
@@ -76,7 +82,6 @@ class MainActivity : ComponentActivity() {
 fun PantallaInicio(
     nombre: String = "Aprendiz",
     resumen: String,
-
     actividades: List<ActividadFormativa>
 ) {
     val scrollState = rememberScrollState()
@@ -89,10 +94,28 @@ fun PantallaInicio(
     ) {
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text(
-            text = "Mi Formación CTMA",
-            style = MaterialTheme.typography.headlineMedium
-        )
+        // Encabezado principal con imagen decorativa
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Decisión semántica documentada:
+            // La imagen es DECORATIVA. Es un logo que acompaña al título "Mi Formación CTMA".
+            // No añade información adicional ya que el texto a su lado indica el contexto de la pantalla.
+            // Se asigna contentDescription = null para que TalkBack (lector de pantalla) la ignore
+            // y evite generar lecturas redundantes o innecesarias.
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null, // Decisión semántica
+                modifier = Modifier.size(48.dp)
+            )
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "Mi Formación CTMA",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -109,7 +132,7 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección nueva: tarjetas de actividad (Parte 1 y 2 de la práctica)
+        // Sección nuevas tarjetas de actividad
         Text(
             text = "Mis actividades",
             style = MaterialTheme.typography.titleMedium
