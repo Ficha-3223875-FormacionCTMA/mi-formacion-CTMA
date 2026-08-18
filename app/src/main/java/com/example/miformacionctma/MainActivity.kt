@@ -5,16 +5,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -132,7 +136,7 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección nuevas tarjetas de actividad
+        // Sección: Mis actividades con adaptación Lista/Grid
         Text(
             text = "Mis actividades",
             style = MaterialTheme.typography.titleMedium
@@ -140,9 +144,29 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            actividades.forEach { actividad ->
-                TarjetaActividad(actividad = actividad, onClick = {})
+        // Adaptación dinámica según el ancho de pantalla
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            // Umbral argumentado: 600dp (estándar Window Size Class Compact vs Medium)
+            // En pantallas < 600dp se muestra en Lista (1 columna).
+            // En pantallas >= 600dp (móviles en horizontal o tablets) se muestra en Grid (2 columnas).
+            val columnas = if (maxWidth >= 600.dp) 2 else 1
+
+            // Cálculo aproximado de la altura necesaria para renderizar la cuadrícula dentro de una Column con scroll
+            val filas = (actividades.size + columnas - 1) / columnas
+            val alturaCalculada = (filas * 160).dp
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(columnas),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                userScrollEnabled = false, // El scroll principal lo maneja la Column exterior
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(alturaCalculada)
+            ) {
+                items(actividades) { actividad ->
+                    TarjetaActividad(actividad = actividad, onClick = {})
+                }
             }
         }
 
@@ -216,9 +240,28 @@ fun PantallaInicio(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 360)
 @Composable
 fun PantallaInicioPreview() {
+    MiFormacionCTMATheme {
+        PantallaInicio(
+            resumen = """
+            Total de actividades: 3
+            Promedio de progreso: 53.3%
+            Actividades urgentes: 1
+            """.trimIndent(),
+            actividades = listOf(
+                ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
+                ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
+                ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 700)
+@Composable
+fun PantallaInicioGridPreview() {
     MiFormacionCTMATheme {
         PantallaInicio(
             resumen = """
