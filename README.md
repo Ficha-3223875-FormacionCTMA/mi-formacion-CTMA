@@ -13,42 +13,6 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ---
 
-# Historias de usuario
-
-### Historia de usuario 1
-
-**Como** aprendiz, **quiero** consultar todas mis actividades, fechas de entrega y enlaces en una sola aplicación, **para** organizar mejor mi proceso de formación y evitar olvidos.
-
-**Criterio de aceptación**
-
-* **Dado** que el aprendiz ha iniciado sesión,
-* **Cuando** acceda a la pantalla principal,
-* **Entonces** deberá visualizar la lista de actividades con su fecha de entrega, descripción y enlace correspondiente.
-
----
-
-### Historia de usuario 2
-
-**Como** aprendiz, **quiero** registrar el avance de mis evidencias y tareas, **para** llevar un control de mi progreso y cumplir oportunamente con mis compromisos académicos.
-
-**Criterio de aceptación**
-
-* **Dado** que el aprendiz selecciona una actividad,
-* **Cuando** marque su estado como **"En progreso"** o **"Completada"**,
-* **Entonces** la aplicación deberá guardar el cambio y mostrar el estado actualizado.
-
----
-
-### Historia de usuario 3
-
-**Como** instructor, **quiero** publicar actividades, recursos y criterios de evaluación, **para** comunicar la información de manera organizada y realizar un seguimiento efectivo del proceso formativo de los aprendices.
-
-**Criterio de aceptación**
-
-* **Dado** que el instructor ha iniciado sesión,
-* **Cuando** registre una nueva actividad con su descripción, fecha y criterios de evaluación,
-* **Entonces** la actividad deberá almacenarse y estar disponible para los aprendices.
-
 ### Criterios de aceptacion por historia
 ## Historias de usuario
 
@@ -90,38 +54,24 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ### Identificacion de dependencias, supuestos y preguntas abiertas
 
-## 3. Dependencias
+## Dependencias y elementos externos
 
 Son elementos externos o componentes de los que depende el funcionamiento del proyecto.
 
-* **Android Studio:** para el desarrollo, compilación y ejecución de la aplicación.
-* **Kotlin y Android SDK:** para la construcción y funcionamiento de la aplicación Android.
-* **Base de datos:** para almacenar información relacionada con usuarios, actividades, recursos, estados y criterios de evaluación.
-* **Conexión a Internet:** necesaria para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
-* **Servicio de autenticación:** utilizado para diferenciar los permisos de aprendices e instructores, en caso de implementar autenticación mediante un servicio externo.
-* **Navegador o aplicación compatible:** necesario para abrir los enlaces externos asociados a las actividades.
+* **Android Studio:** para el desarrollo y ejecución de la aplicación.
+* **Kotlin y Android SDK:** para la construcción de la aplicación Android.
+* **Base de datos:** para almacenar usuarios, actividades, recursos, estados y criterios de evaluación.
+* **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
+* **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
+* **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
+Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
 
-## 4. Supuestos
+**Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
 
-Los supuestos son condiciones que se consideran ciertas para poder desarrollar el proyecto.
+Este criterio es adecuado para el README porque no se queda en algo ambiguo como "la aplicación debe ser rápida".
 
-* Se asume que los usuarios tendrán un dispositivo Android compatible con la versión mínima definida para la aplicación.
-* Se asume que cada usuario tendrá un tipo de rol definido: **aprendiz** o **instructor**.
-* Se asume que los instructores serán responsables de registrar información correcta sobre las actividades, fechas y criterios de evaluación.
-* Se asume que los aprendices tendrán acceso a las actividades correspondientes a su proceso formativo.
-* Se asume que el usuario tendrá conexión a Internet para las funcionalidades que requieran sincronización con el servidor.
-* Se asume que los enlaces y recursos publicados por los instructores serán accesibles y válidos.
+También podrían agregarse posteriormente otros criterios, como disponibilidad, seguridad o usabilidad, pero con uno medible ya se cumple el requisito.
 
-## 5. Preguntas abiertas
+### Identificacion de dependencias, supuestos y preguntas abiertas
 
-Estas son decisiones que todavía deberían definirse durante el desarrollo del proyecto.
-
-1. ¿Qué versión mínima de Android será compatible con la aplicación?
-2. ¿La aplicación funcionará parcialmente sin conexión a Internet?
-3. ¿Qué tecnología se utilizará para el backend y la base de datos?
-4. ¿Cómo se realizará el inicio de sesión y la autenticación de los usuarios?
-5. ¿Cómo se asignarán los aprendices a sus respectivos instructores o grupos de formación?
-6. ¿Los aprendices podrán adjuntar archivos o evidencias directamente desde la aplicación?
-7. ¿Se implementarán notificaciones para recordar fechas próximas de entrega?
-8. ¿Los instructores podrán modificar o eliminar actividades después de publicarlas?
-9. ¿Qué formatos y tamaño máximo tendrán las evidencias que puedan subir los aprendices?
+## 3. Dependencia
