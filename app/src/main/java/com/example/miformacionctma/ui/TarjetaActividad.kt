@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.ReglasActividad
@@ -51,7 +53,13 @@ fun TarjetaActividad(
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .semantics(mergeDescendants = true) {
+                contentDescription = "${actividad.titulo}. $estado. " +
+                        "${actividad.progreso} por ciento completado. " +
+                        textoDiasRestantes(actividad.diasRestantes)
+            }
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
