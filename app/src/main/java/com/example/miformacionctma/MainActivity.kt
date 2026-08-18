@@ -39,6 +39,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // 1. Lista construida con 10 elementos
         val actividades = listOf(
             ActividadFormativa(
                 id = 1,
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
             ActividadFormativa(
                 id = 2,
                 titulo = "Android Studio",
-                descripcion = "Instalar Android Studio",
+                descripcion = "Instalar Android Studio y entorno",
                 progreso = 60,
                 diasRestantes = 1,
                 prioridad = Prioridad.MEDIA
@@ -63,8 +65,65 @@ class MainActivity : ComponentActivity() {
                 progreso = 0,
                 diasRestantes = 5,
                 prioridad = Prioridad.BAJA
+            ),
+            ActividadFormativa(
+                id = 4,
+                titulo = "Diseño UI/UX",
+                descripcion = "Crear prototipo de interfaz en Figma",
+                progreso = 80,
+                diasRestantes = 2,
+                prioridad = Prioridad.ALTA
+            ),
+            ActividadFormativa(
+                id = 5,
+                titulo = "Base de Datos Room",
+                descripcion = "Modelar las entidades principales de la app",
+                progreso = 30,
+                diasRestantes = 4,
+                prioridad = Prioridad.MEDIA
+            ),
+            ActividadFormativa(
+                id = 6,
+                titulo = "Navegación Compose",
+                descripcion = "Configurar NavHost y rutas de la aplicación",
+                progreso = 0,
+                diasRestantes = 7,
+                prioridad = Prioridad.BAJA
+            ),
+            ActividadFormativa(
+                id = 7,
+                titulo = "Pruebas Unitarias",
+                descripcion = "Implementar pruebas JUnit para las reglas de negocio",
+                progreso = 10,
+                diasRestantes = 3,
+                prioridad = Prioridad.ALTA
+            ),
+            ActividadFormativa(
+                id = 8,
+                titulo = "Uso de ViewModel",
+                descripcion = "Gestionar el estado de la interfaz de usuario",
+                progreso = 0,
+                diasRestantes = 8,
+                prioridad = Prioridad.MEDIA
+            ),
+            ActividadFormativa(
+                id = 9,
+                titulo = "Consumo de API REST",
+                descripcion = "Conectar Retrofit con el backend de servicios",
+                progreso = 0,
+                diasRestantes = 10,
+                prioridad = Prioridad.BAJA
+            ),
+            ActividadFormativa(
+                id = 10,
+                titulo = "Entrega de Evidencias",
+                descripcion = "Subir el proyecto final al repositorio institucional",
+                progreso = 0,
+                diasRestantes = 12,
+                prioridad = Prioridad.ALTA
             )
         )
+
         val promedio = ReglasActividad.promedioProgreso(actividades)
         val urgentes = ReglasActividad.actividadesUrgentes(actividades)
 
@@ -102,14 +161,9 @@ fun PantallaInicio(
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Decisión semántica documentada:
-            // La imagen es DECORATIVA. Es un logo que acompaña al título "Mi Formación CTMA".
-            // No añade información adicional ya que el texto a su lado indica el contexto de la pantalla.
-            // Se asigna contentDescription = null para que TalkBack (lector de pantalla) la ignore
-            // y evite generar lecturas redundantes o innecesarias.
             Image(
                 painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = null, // Decisión semántica
+                contentDescription = null, // Decisión semántica documentada
                 modifier = Modifier.size(48.dp)
             )
 
@@ -136,7 +190,7 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección: Mis actividades con adaptación Lista/Grid
+        // Sección: Mis actividades con adaptación Lista/Grid o Estado Vacío
         Text(
             text = "Mis actividades",
             style = MaterialTheme.typography.titleMedium
@@ -144,28 +198,31 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Adaptación dinámica según el ancho de pantalla
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Umbral argumentado: 600dp (estándar Window Size Class Compact vs Medium)
-            // En pantallas < 600dp se muestra en Lista (1 columna).
-            // En pantallas >= 600dp (móviles en horizontal o tablets) se muestra en Grid (2 columnas).
-            val columnas = if (maxWidth >= 600.dp) 2 else 1
+        // 2. Control de estado vacío
+        if (actividades.isEmpty()) {
+            EstadoVacioActividades()
+        } else {
+            // Adaptación dinámica según el ancho de pantalla
+            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                val columnas = if (maxWidth >= 600.dp) 2 else 1
+                val filas = (actividades.size + columnas - 1) / columnas
+                val alturaCalculada = (filas * 160).dp
 
-            // Cálculo aproximado de la altura necesaria para renderizar la cuadrícula dentro de una Column con scroll
-            val filas = (actividades.size + columnas - 1) / columnas
-            val alturaCalculada = (filas * 160).dp
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(columnas),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                userScrollEnabled = false, // El scroll principal lo maneja la Column exterior
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(alturaCalculada)
-            ) {
-                items(actividades) { actividad ->
-                    TarjetaActividad(actividad = actividad, onClick = {})
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(columnas),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    userScrollEnabled = false, // El scroll principal lo maneja la Column exterior
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(alturaCalculada)
+                ) {
+                    items(
+                        items = actividades,
+                        key = { actividad -> actividad.id } // Clave estable por ítem
+                    ) { actividad ->
+                        TarjetaActividad(actividad = actividad, onClick = {})
+                    }
                 }
             }
         }
@@ -240,6 +297,41 @@ fun PantallaInicio(
     }
 }
 
+// Composable independiente para representar el estado vacío
+@Composable
+fun EstadoVacioActividades(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = null, // Imagen decorativa
+            modifier = Modifier.size(72.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "No hay actividades registradas",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "En este momento no tienes tareas ni evidencias pendientes.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+// Preview compacta con lista de actividades
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 fun PantallaInicioPreview() {
@@ -259,6 +351,7 @@ fun PantallaInicioPreview() {
     }
 }
 
+// Preview adaptativa en modo horizontal/tablet
 @Preview(showBackground = true, widthDp = 700)
 @Composable
 fun PantallaInicioGridPreview() {
@@ -274,6 +367,22 @@ fun PantallaInicioGridPreview() {
                 ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
                 ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
             )
+        )
+    }
+}
+
+// Preview específica para validar visualmente el Estado Vacío
+@Preview(showBackground = true, widthDp = 360)
+@Composable
+fun PantallaInicioEstadoVacioPreview() {
+    MiFormacionCTMATheme {
+        PantallaInicio(
+            resumen = """
+            Total de actividades: 0
+            Promedio de progreso: 0.0%
+            Actividades urgentes: 0
+            """.trimIndent(),
+            actividades = emptyList()
         )
     }
 }
