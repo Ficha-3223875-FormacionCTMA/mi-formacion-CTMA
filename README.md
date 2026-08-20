@@ -137,3 +137,25 @@ Las pruebas de esta iteración deben soportar la decisión de si el flujo de aut
 
 Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
 
+## 6. Riesgos
+
+Se priorizan según la matriz construida en el taller de planificación. Las dos primeras filas concentran el esfuerzo inicial de prueba por su exposición muy alta.
+
+| Riesgo | Prob. | Impacto | Exposición | Prioridad |
+| :--- | :---: | :---: | :---: | :--- |
+| Acceso a órdenes ajenas | 4 | 5 | 20 | Muy alta |
+| Entrega sin evidencia | 4 | 5 | 20 | Muy alta |
+| Registro duplicado por doble clic | 3 | 4 | 12 | Alta |
+| Texto desalineado en escritorio | 2 | 1 | 2 | Baja |
+
+---
+
+## 7. Enfoque
+
+Se combinan varios niveles según el riesgo asociado:
+
+- **Pruebas unitarias:** Para la regla que impide guardar una entrega sin foto.
+- **Pruebas de integración:** Para confirmar que la evidencia queda asociada a la orden correcta.
+- **Pruebas de sistema o end-to-end:** Para el flujo completo de iniciar sesión, abrir la orden, adjuntar evidencia y confirmar.
+- **Pruebas de aceptación:** Para validar la política de entrega con el responsable de negocio.
+- **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
