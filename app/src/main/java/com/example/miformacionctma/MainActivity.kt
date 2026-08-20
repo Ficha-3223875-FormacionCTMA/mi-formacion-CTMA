@@ -304,7 +304,7 @@ fun PantallaInicio(
             • De Integración: Verifican que varios componentes funcionen correctamente juntos.
             • De Interfaz / UI: Comprueban que los elementos visuales y pantallas se muestren e interactúen bien.
             • Funcionales: Validan que el sistema completo cumpla con los requisitos del usuario.
-            """.trimIndent(),
+            s""".trimIndent(),
             style = MaterialTheme.typography.bodyMedium
         ) */
 
