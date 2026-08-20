@@ -308,110 +308,110 @@ fun PantallaInicio(
             style = MaterialTheme.typography.bodyMedium
         ) */
 
-Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
 // Demostración de recomposición (Parte 7 de la práctica)
-Text(
-    text = "Demostración de recomposición",
-    style = MaterialTheme.typography.titleMedium
-)
-Spacer(modifier = Modifier.height(8.dp))
-TarjetaActividad(actividad = actividadDemo, onClick = {})
-Spacer(modifier = Modifier.height(8.dp))
-Button(onClick = { actividadDemo = actividadDemo.copy(progreso = 100) }) {
-    Text("Cambiar progreso a 100")
-}
+        Text(
+            text = "Demostración de recomposición",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        TarjetaActividad(actividad = actividadDemo, onClick = {})
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = { actividadDemo = actividadDemo.copy(progreso = 100) }) {
+            Text("Cambiar progreso a 100")
+        }
 
-Spacer(modifier = Modifier.height(32.dp))
-}
+        Spacer(modifier = Modifier.height(32.dp))
+    }
 }
 
 // Composable independiente para representar el estado vacío
 @Composable
 fun EstadoVacioActividades(
-modifier: Modifier = Modifier
+    modifier: Modifier = Modifier
 ) {
-Column(
-modifier = modifier
-    .fillMaxWidth()
-    .padding(32.dp),
-horizontalAlignment = Alignment.CenterHorizontally,
-verticalArrangement = Arrangement.Center
-) {
-Image(
-    painter = painterResource(id = R.drawable.ic_launcher_foreground),
-    contentDescription = null, // Imagen decorativa
-    modifier = Modifier.size(72.dp)
-)
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            contentDescription = null, // Imagen decorativa
+            modifier = Modifier.size(72.dp)
+        )
 
-Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-Text(
-    text = "No hay actividades registradas",
-    style = MaterialTheme.typography.titleMedium
-)
+        Text(
+            text = "No hay actividades registradas",
+            style = MaterialTheme.typography.titleMedium
+        )
 
-Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-Text(
-    text = "En este momento no tienes tareas ni evidencias pendientes.",
-    style = MaterialTheme.typography.bodyMedium
-)
-}
+        Text(
+            text = "En este momento no tienes tareas ni evidencias pendientes.",
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
 }
 
 // Preview compacta con lista de actividades
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 fun PantallaInicioPreview() {
-MiFormacionCTMATheme {
-PantallaInicio(
-    resumen = """
+    MiFormacionCTMATheme {
+        PantallaInicio(
+            resumen = """
     Total de actividades: 3
     Promedio de progreso: 53.3%
     Actividades urgentes: 1
     """.trimIndent(),
-    actividades = listOf(
-        ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
-        ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
-        ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
-    )
-)
-}
+            actividades = listOf(
+                ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
+                ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
+                ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
+            )
+        )
+    }
 }
 
 // Preview adaptativa en modo horizontal/tablet
 @Preview(showBackground = true, widthDp = 700)
 @Composable
 fun PantallaInicioGridPreview() {
-MiFormacionCTMATheme {
-PantallaInicio(
-    resumen = """
+    MiFormacionCTMATheme {
+        PantallaInicio(
+            resumen = """
     Total de actividades: 3
     Promedio de progreso: 53.3%
     Actividades urgentes: 1
     """.trimIndent(),
-    actividades = listOf(
-        ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
-        ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
-        ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
-    )
-)
-}
+            actividades = listOf(
+                ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
+                ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
+                ActividadFormativa(3, "Jetpack Compose", "Crear la primera pantalla", 0, 5, Prioridad.BAJA)
+            )
+        )
+    }
 }
 
 // Preview específica para validar visualmente el Estado Vacío
 @Preview(showBackground = true, widthDp = 360)
 @Composable
 fun PantallaInicioEstadoVacioPreview() {
-MiFormacionCTMATheme {
-PantallaInicio(
-    resumen = """
+    MiFormacionCTMATheme {
+        PantallaInicio(
+            resumen = """
     Total de actividades: 0
     Promedio de progreso: 0.0%
     Actividades urgentes: 0
     """.trimIndent(),
-    actividades = emptyList()
-)
-}
+            actividades = emptyList()
+        )
+    }
 }
