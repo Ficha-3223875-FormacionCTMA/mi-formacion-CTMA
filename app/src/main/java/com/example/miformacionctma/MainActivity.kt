@@ -34,6 +34,11 @@ import com.example.miformacionctma.domain.Prioridad
 import com.example.miformacionctma.domain.ReglasActividad
 import com.example.miformacionctma.ui.TarjetaActividad
 import com.example.miformacionctma.ui.theme.MiFormacionCTMATheme
+import androidx.compose.material3.Button
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -149,6 +154,20 @@ fun PantallaInicio(
 ) {
     val scrollState = rememberScrollState()
 
+    // Estado de demostración para la Parte 7 (recomposición)
+    var actividadDemo by remember {
+        mutableStateOf(
+            ActividadFormativa(
+                id = 99,
+                titulo = "Demostración de recomposición",
+                descripcion = "Cambia el progreso para observar qué se vuelve a dibujar.",
+                progreso = 60,
+                diasRestantes = 1,
+                prioridad = Prioridad.MEDIA
+            )
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -182,7 +201,6 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Resumen de las actividades
         Text(
             text = resumen,
             style = MaterialTheme.typography.bodyMedium
@@ -190,7 +208,6 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Sección: Mis actividades con adaptación Lista/Grid o Estado Vacío
         Text(
             text = "Mis actividades",
             style = MaterialTheme.typography.titleMedium
@@ -198,11 +215,9 @@ fun PantallaInicio(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // 2. Control de estado vacío
         if (actividades.isEmpty()) {
             EstadoVacioActividades()
         } else {
-            // Adaptación dinámica según el ancho de pantalla
             BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
                 val columnas = if (maxWidth >= 600.dp) 2 else 1
                 val filas = (actividades.size + columnas - 1) / columnas
@@ -212,14 +227,14 @@ fun PantallaInicio(
                     columns = GridCells.Fixed(columnas),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    userScrollEnabled = false, // El scroll principal lo maneja la Column exterior
+                    userScrollEnabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(alturaCalculada)
                 ) {
                     items(
                         items = actividades,
-                        key = { actividad -> actividad.id } // Clave estable por ítem
+                        key = { actividad -> actividad.id }
                     ) { actividad ->
                         TarjetaActividad(actividad = actividad, onClick = {})
                     }
@@ -228,57 +243,57 @@ fun PantallaInicio(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+        /*
+                // Sección 1: Valores del Manifiesto Ágil
+                Text(
+                    text = """
+                    Valores del Manifiesto Ágil
 
-        // Sección 1: Valores del Manifiesto Ágil
-        Text(
-            text = """
-            Valores del Manifiesto Ágil
+                    • Individuos e interacciones:
+                    La comunicación del equipo es más importante que las herramientas.
 
-            • Individuos e interacciones:
-            La comunicación del equipo es más importante que las herramientas.
+                    • Software funcionando:
+                    Es mejor una aplicación que funcione que mucha documentación.
 
-            • Software funcionando:
-            Es mejor una aplicación que funcione que mucha documentación.
+                    • Colaboración con el cliente:
+                    Trabajar junto al cliente permite obtener mejores resultados.
 
-            • Colaboración con el cliente:
-            Trabajar junto al cliente permite obtener mejores resultados.
+                    • Respuesta ante el cambio:
+                    Adaptarse a los cambios ayuda a mejorar el proyecto.
+                    """.trimIndent(),
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
-            • Respuesta ante el cambio:
-            Adaptarse a los cambios ayuda a mejorar el proyecto.
-            """.trimIndent(),
-            style = MaterialTheme.typography.bodyMedium
-        )
+                Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+                // Sección 2: Fundamentos de Scrum
+                Text(
+                    text = """
+                    ¿Qué es Scrum?
+                    Es un marco de trabajo ágil para desarrollar proyectos en ciclos cortos y repetitivos (de 2 a 4 semanas) llamados Sprints.
 
-        // Sección 2: Fundamentos de Scrum
-        Text(
-            text = """
-            ¿Qué es Scrum?
-            Es un marco de trabajo ágil para desarrollar proyectos en ciclos cortos y repetitivos (de 2 a 4 semanas) llamados Sprints.
+                    Roles
+                    • Product Owner: Prioriza lo que se debe hacer (representa al cliente).
+                    • Scrum Master: Facilita el proceso y elimina bloqueos.
+                    • Developers: Diseñan, programan y prueban el producto.
 
-            Roles
-            • Product Owner: Prioriza lo que se debe hacer (representa al cliente).
-            • Scrum Master: Facilita el proceso y elimina bloqueos.
-            • Developers: Diseñan, programan y prueban el producto.
+                    Artefactos
+                    • Product Backlog: Lista general de todo lo que requiere el proyecto.
+                    • Sprint Backlog: Tareas seleccionadas para trabajar en el Sprint actual.
+                    • Incremento: La versión funcional y terminada del producto al final del Sprint.
 
-            Artefactos
-            • Product Backlog: Lista general de todo lo que requiere el proyecto.
-            • Sprint Backlog: Tareas seleccionadas para trabajar en el Sprint actual.
-            • Incremento: La versión funcional y terminada del producto al final del Sprint.
+                    Ceremonias
+                    • Sprint Planning: Definir qué se hará en el Sprint.
+                    • Daily Scrum: Reunión diaria de 15 min para sincronizar avances.
+                    • Sprint Review: Mostrar el producto terminado a los interesados.
+                    • Sprint Retrospective: Evaluar cómo trabajó el equipo para mejorar en el siguiente ciclo.
+                    """.trimIndent(),
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
-            Ceremonias
-            • Sprint Planning: Definir qué se hará en el Sprint.
-            • Daily Scrum: Reunión diaria de 15 min para sincronizar avances.
-            • Sprint Review: Mostrar el producto terminado a los interesados.
-            • Sprint Retrospective: Evaluar cómo trabajó el equipo para mejorar en el siguiente ciclo.
-            """.trimIndent(),
-            style = MaterialTheme.typography.bodyMedium
-        )
+                Spacer(modifier = Modifier.height(24.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Sección 3: Pruebas de Software
+        Sección 3: Pruebas de Software
         Text(
             text = """
             Pruebas de Software
@@ -289,9 +304,23 @@ fun PantallaInicio(
             • De Integración: Verifican que varios componentes funcionen correctamente juntos.
             • De Interfaz / UI: Comprueban que los elementos visuales y pantallas se muestren e interactúen bien.
             • Funcionales: Validan que el sistema completo cumpla con los requisitos del usuario.
-            """.trimIndent(),
+            s""".trimIndent(),
             style = MaterialTheme.typography.bodyMedium
+        ) */
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+// Demostración de recomposición (Parte 7 de la práctica)
+        Text(
+            text = "Demostración de recomposición",
+            style = MaterialTheme.typography.titleMedium
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        TarjetaActividad(actividad = actividadDemo, onClick = {})
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = { actividadDemo = actividadDemo.copy(progreso = 100) }) {
+            Text("Cambiar progreso a 100")
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
     }
@@ -338,10 +367,10 @@ fun PantallaInicioPreview() {
     MiFormacionCTMATheme {
         PantallaInicio(
             resumen = """
-            Total de actividades: 3
-            Promedio de progreso: 53.3%
-            Actividades urgentes: 1
-            """.trimIndent(),
+    Total de actividades: 3
+    Promedio de progreso: 53.3%
+    Actividades urgentes: 1
+    """.trimIndent(),
             actividades = listOf(
                 ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
                 ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
@@ -358,10 +387,10 @@ fun PantallaInicioGridPreview() {
     MiFormacionCTMATheme {
         PantallaInicio(
             resumen = """
-            Total de actividades: 3
-            Promedio de progreso: 53.3%
-            Actividades urgentes: 1
-            """.trimIndent(),
+    Total de actividades: 3
+    Promedio de progreso: 53.3%
+    Actividades urgentes: 1
+    """.trimIndent(),
             actividades = listOf(
                 ActividadFormativa(1, "Fundamentos de Kotlin", "Aprender variables y funciones", 100, -2, Prioridad.ALTA),
                 ActividadFormativa(2, "Android Studio", "Instalar Android Studio", 60, 1, Prioridad.MEDIA),
@@ -378,10 +407,10 @@ fun PantallaInicioEstadoVacioPreview() {
     MiFormacionCTMATheme {
         PantallaInicio(
             resumen = """
-            Total de actividades: 0
-            Promedio de progreso: 0.0%
-            Actividades urgentes: 0
-            """.trimIndent(),
+    Total de actividades: 0
+    Promedio de progreso: 0.0%
+    Actividades urgentes: 0
+    """.trimIndent(),
             actividades = emptyList()
         )
     }
