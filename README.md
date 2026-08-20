@@ -109,3 +109,31 @@ Estas son decisiones que todavía deberían definirse durante el desarrollo del 
 7. ¿Se implementarán notificaciones para recordar fechas próximas de entrega?
 8. ¿Los instructores podrán modificar o eliminar actividades después de publicarlas?
 9. ¿Qué formatos y tamaño máximo tendrán las evidencias que puedan subir los aprendices?
+
+# Taller 2 Plan de pruebas V1
+
+## Resumen de responsabilidades por integrante
+
+| Integrante      | Secciones   | Enfoque de su parte                                                                                                 |
+|-----------------| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+| Miguel Angel O  | 1, 2 y 3    | Identificación, objetivo y alcance incluido: qué decisión deben soportar las pruebas y qué entra en esta iteración. |
+| Juan Daniel P   | 4 y 5       | Fuera de alcance y base de prueba: qué queda excluido y sobre qué documentos se apoya el plan.                      |
+| Juan Jose G     | 6 y 7       | Riesgos y enfoque: prioriza el catálogo de riesgos y define niveles y tipos de prueba por riesgo.                   |
+| Wendi Daianna R | 8 y 9       | Ambiente y roles: qué se necesita para ejecutar y quién hace qué dentro del equipo.                                 |
+| Juan David G    | 10, 11 y 12 | Criterios de entrada/suspensión/salida, entregables y cronograma: cuándo empezar, pausar y cerrar.                  |
+
+# 1. Identificación
+
+**Producto:** EntregaSegura.
+**Documento:** Plan de pruebas v1 (borrador).
+**Responsable de esta versión:** equipo de pruebas conformado por cinco integrantes.
+**Fecha de elaboración:** 19 de agosto de 2026.
+
+# 2. Objetivo
+
+Las pruebas de esta iteración deben soportar la decisión de si el flujo de autenticación, autorización por rol y confirmación de entrega con evidencia fotográfica cumple los criterios de aceptación definidos para la historia **HU-ENT-01** y la regla de negocio de **no duplicidad**, antes de habilitar el paso a producción del incremento correspondiente.
+
+# 3. Alcance incluido
+
+Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
+
