@@ -1,4 +1,4 @@
-# Planteamiento del problema
+    # Planteamiento del problema
 
 Actualmente, los aprendices administran sus actividades académicas, enlaces de acceso, evidencias y fechas de entrega utilizando diferentes canales y herramientas, como aplicaciones de mensajería, correos electrónicos y notas personales. Esta dispersión de la información ocasiona olvidos, pérdida de evidencias, duplicación de tareas y dificultades para realizar un seguimiento adecuado del proceso formativo. Asimismo, los instructores enfrentan limitaciones para comunicar actividades y criterios de evaluación de manera organizada, afectando la trazabilidad del aprendizaje. Desde el punto de vista del desarrollo, resulta necesario contar con una base técnica sólida que permita evolucionar la aplicación sin comprometer su estabilidad. Por ello, surge la necesidad de desarrollar **Mi Formación CTMA**, una aplicación Android que centralice la gestión académica y facilite la organización, la comunicación y el seguimiento del proceso formativo.
 
@@ -137,6 +137,17 @@ Las pruebas de esta iteración deben soportar la decisión de si el flujo de aut
 
 Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
 
+
+## 4. Fuera de alcance
+
+Quedan excluidas de esta iteración la **facturación**, la **integración con operadores logísticos** y las **pruebas de carga masiva**, porque no forman parte del incremento actual. Estos componentes se abordarán cuando entren en desarrollo.
+
+
+## 5. Base de prueba
+
+La historia **HU-ENT-01** con sus criterios de aceptación redactados en formato **Given-When-Then**, la regla de negocio sobre evitar duplicidad de registro y el catálogo de riesgos identificado en el taller de planificación.
+
+
 ## 6. Riesgos
 
 Se priorizan según la matriz construida en el taller de planificación. Las dos primeras filas concentran el esfuerzo inicial de prueba por su exposición muy alta.
@@ -158,4 +169,8 @@ Se combinan varios niveles según el riesgo asociado:
 - **Pruebas de integración:** Para confirmar que la evidencia queda asociada a la orden correcta.
 - **Pruebas de sistema o end-to-end:** Para el flujo completo de iniciar sesión, abrir la orden, adjuntar evidencia y confirmar.
 - **Pruebas de aceptación:** Para validar la política de entrega con el responsable de negocio.
+
 - **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
+
+- **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
+
