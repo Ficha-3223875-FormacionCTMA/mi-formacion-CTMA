@@ -13,46 +13,57 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ---
 
-# Historias de usuario
-
-### Historia de usuario 1
-
-**Como** aprendiz, **quiero** consultar todas mis actividades, fechas de entrega y enlaces en una sola aplicación, **para** organizar mejor mi proceso de formación y evitar olvidos.
-
-**Criterio de aceptación**
-
-* **Dado** que el aprendiz ha iniciado sesión,
-* **Cuando** acceda a la pantalla principal,
-* **Entonces** deberá visualizar la lista de actividades con su fecha de entrega, descripción y enlace correspondiente.
-
----
-
-### Historia de usuario 2
-
-**Como** aprendiz, **quiero** registrar el avance de mis evidencias y tareas, **para** llevar un control de mi progreso y cumplir oportunamente con mis compromisos académicos.
-
-**Criterio de aceptación**
-
-* **Dado** que el aprendiz selecciona una actividad,
-* **Cuando** marque su estado como **"En progreso"** o **"Completada"**,
-* **Entonces** la aplicación deberá guardar el cambio y mostrar el estado actualizado.
-
----
-
-### Historia de usuario 3
-
-**Como** instructor, **quiero** publicar actividades, recursos y criterios de evaluación, **para** comunicar la información de manera organizada y realizar un seguimiento efectivo del proceso formativo de los aprendices.
-
-**Criterio de aceptación**
-
-* **Dado** que el instructor ha iniciado sesión,
-* **Cuando** registre una nueva actividad con su descripción, fecha y criterios de evaluación,
-* **Entonces** la actividad deberá almacenarse y estar disponible para los aprendices.
-
 ### Criterios de aceptacion por historia
+## Historias de usuario
+
+### Historia de usuario 1 — Consultar actividades
+
+**Como aprendiz**, quiero consultar mis actividades registradas para conocer la información y los recursos asociados a cada una.
+
+**Criterios de aceptación:**
+
+* **Dado que** el aprendiz ha iniciado sesión, **cuando** acceda a la pantalla principal, **entonces** deberá visualizar sus actividades registradas.
+* **Dado que** existen actividades registradas, **cuando** el aprendiz consulte una actividad, **entonces** deberá visualizar como mínimo su título, descripción y fecha de entrega.
+* **Dado que** una actividad contiene un enlace, **cuando** el aprendiz consulte dicha actividad, **entonces** deberá poder acceder al enlace correspondiente.
+
+---
+
+### Historia de usuario 2 — Registrar avance
+
+**Como aprendiz**, quiero actualizar el estado de mis actividades para llevar un seguimiento de mi progreso.
+
+**Criterios de aceptación:**
+
+* **Dado que** el aprendiz ha seleccionado una actividad, **cuando** cambie su estado a **"En progreso"**, **entonces** la aplicación deberá guardar y mostrar el nuevo estado.
+* **Dado que** una actividad se encuentra en progreso, **cuando** el aprendiz la marque como **"Completada"**, **entonces** la aplicación deberá actualizar y guardar el estado.
+* **Dado que** el aprendiz vuelva a consultar una actividad cuyo estado fue modificado, **cuando** acceda a ella, **entonces** deberá visualizar el último estado guardado.
+
+---
+
+### Historia de usuario 3 — Publicar actividades
+
+**Como instructor**, quiero registrar y publicar actividades para que los aprendices puedan consultar la información y los recursos correspondientes.
+
+**Criterios de aceptación:**
+
+* **Dado que** el instructor ha iniciado sesión, **cuando** registre una actividad con título, descripción y fecha de entrega, **entonces** la aplicación deberá almacenarla correctamente.
+* **Dado que** el instructor ha registrado una actividad, **cuando** agregue recursos o criterios de evaluación, **entonces** estos deberán quedar asociados a la actividad.
+* **Dado que** una actividad ha sido publicada, **cuando** un aprendiz consulte sus actividades, **entonces** deberá poder visualizar la información publicada por el instructor.
 
 ### Criterios no funcional medible
 
+### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## Dependencias y elementos externos
+
+Son elementos externos o componentes de los que depende el funcionamiento del proyecto.
+
+* **Android Studio:** para el desarrollo y ejecución de la aplicación.
+* **Kotlin y Android SDK:** para la construcción de la aplicación Android.
+* **Base de datos:** para almacenar usuarios, actividades, recursos, estados y criterios de evaluación.
+* **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
+* **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
+* **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
 Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
 
 **Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
@@ -126,6 +137,7 @@ Las pruebas de esta iteración deben soportar la decisión de si el flujo de aut
 
 Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
 
+
 ## 4. Fuera de alcance
 
 Quedan excluidas de esta iteración la **facturación**, la **integración con operadores logísticos** y las **pruebas de carga masiva**, porque no forman parte del incremento actual. Estos componentes se abordarán cuando entren en desarrollo.
@@ -157,4 +169,8 @@ Se combinan varios niveles según el riesgo asociado:
 - **Pruebas de integración:** Para confirmar que la evidencia queda asociada a la orden correcta.
 - **Pruebas de sistema o end-to-end:** Para el flujo completo de iniciar sesión, abrir la orden, adjuntar evidencia y confirmar.
 - **Pruebas de aceptación:** Para validar la política de entrega con el responsable de negocio.
+
 - **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
+
+- **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
+
