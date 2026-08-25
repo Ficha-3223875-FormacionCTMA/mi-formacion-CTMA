@@ -174,3 +174,19 @@ Se combinan varios niveles según el riesgo asociado:
 
 - **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
 
+### 10. Criterios de entrada, suspensión, reanudación y salida
+
+| Categoría | Ejemplo |
+| :--- | :--- |
+| **Entrada** | Historias y criterios revisados; ambiente desplegado; usuarios y datos disponibles; versión identificada. |
+| **Suspensión** | Ambiente inestable; bloqueo de autenticación; datos corruptos; más del 30% de casos bloqueados por la misma causa. |
+| **Reanudación** | Corrección desplegada; *smoke test* aprobado; datos restaurados; incidente documentado. |
+| **Salida** | 100% de casos críticos ejecutados; cero defectos críticos abiertos; riesgos residuales aceptados y comunicados. |
+
+### 11. Entregables
+
+Casos de prueba diseñados y ejecutados, evidencias de ejecución, registro de defectos encontrados, métricas de cobertura y avance, e informe breve de cierre para la revisión entre pares.
+
+### 12. Cronograma
+
+Dentro de los 90 minutos que la guía asigna al taller de planificación: aproximadamente 20 minutos para consolidar la matriz de riesgos, 40 minutos para redactar las 12 secciones del plan en paralelo entre los cinco integrantes, y 30 minutos para integrar el trabajo del equipo y revisarlo antes de pasar a la actividad 5 (revisión entre pares, 45 minutos).
