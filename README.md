@@ -115,40 +115,39 @@ Estas son decisiones que todavía deberían definirse durante el desarrollo del 
 ## Resumen de responsabilidades por integrante
 
 | Integrante      | Secciones   | Enfoque de su parte                                                                                                 |
-|-----------------| ----------- | ------------------------------------------------------------------------------------------------------------------- |
+|-----------------|-------------| ------------------------------------------------------------------------------------------------------------------- |
 | Miguel Angel O  | 1, 2 y 3    | Identificación, objetivo y alcance incluido: qué decisión deben soportar las pruebas y qué entra en esta iteración. |
 | Juan Daniel P   | 4 y 5       | Fuera de alcance y base de prueba: qué queda excluido y sobre qué documentos se apoya el plan.                      |
-| Juan Jose G     | 6 y 7       | Riesgos y enfoque: prioriza el catálogo de riesgos y define niveles y tipos de prueba por riesgo.                   |
-| Wendi Daianna R | 8 y 9       | Ambiente y roles: qué se necesita para ejecutar y quién hace qué dentro del equipo.                                 |
+| Juan Jose G     | 6,7,8 y 9   | Riesgos y enfoque: prioriza el catálogo de riesgos y define niveles y tipos de prueba por riesgo.                   |
 | Juan David G    | 10, 11 y 12 | Criterios de entrada/suspensión/salida, entregables y cronograma: cuándo empezar, pausar y cerrar.                  |
 
-# 1. Identificación
+### 1. Identificación
 
 **Producto:** EntregaSegura.
 **Documento:** Plan de pruebas v1 (borrador).
 **Responsable de esta versión:** equipo de pruebas conformado por cinco integrantes.
 **Fecha de elaboración:** 19 de agosto de 2026.
 
-# 2. Objetivo
+### 2. Objetivo
 
 Las pruebas de esta iteración deben soportar la decisión de si el flujo de autenticación, autorización por rol y confirmación de entrega con evidencia fotográfica cumple los criterios de aceptación definidos para la historia **HU-ENT-01** y la regla de negocio de **no duplicidad**, antes de habilitar el paso a producción del incremento correspondiente.
 
-# 3. Alcance incluido
+### 3. Alcance incluido
 
 Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
 
 
-## 4. Fuera de alcance
+### 4. Fuera de alcance
 
 Quedan excluidas de esta iteración la **facturación**, la **integración con operadores logísticos** y las **pruebas de carga masiva**, porque no forman parte del incremento actual. Estos componentes se abordarán cuando entren en desarrollo.
 
 
-## 5. Base de prueba
+### 5. Base de prueba
 
 La historia **HU-ENT-01** con sus criterios de aceptación redactados en formato **Given-When-Then**, la regla de negocio sobre evitar duplicidad de registro y el catálogo de riesgos identificado en el taller de planificación.
 
 
-## 6. Riesgos
+### 6. Riesgos
 
 Se priorizan según la matriz construida en el taller de planificación. Las dos primeras filas concentran el esfuerzo inicial de prueba por su exposición muy alta.
 
@@ -161,7 +160,7 @@ Se priorizan según la matriz construida en el taller de planificación. Las dos
 
 ---
 
-## 7. Enfoque
+### 7. Enfoque
 
 Se combinan varios niveles según el riesgo asociado:
 
@@ -173,6 +172,34 @@ Se combinan varios niveles según el riesgo asociado:
 - **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
 
 - **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
+
+### 8. Ambiente y Datos
+**Responsable:** Daiana
+
+* **Requerimientos de Hardware y Software:**
+    * Computador con navegador Google Chrome o Microsoft Edge actualizado.
+    * Dispositivo Android representativo.
+    * Conexión a internet estable.
+    * Acceso a la documentación de requisitos y al prototipo del caso.
+
+* **Datos de Prueba:**
+    * **Cuentas de usuario:** Al menos dos roles configurados:
+        * Mensajero con orden asignada.
+        * Mensajero sin asignación.
+    * **Órdenes:** Datos ficticios para cubrir los siguientes escenarios:
+        * Escenario positivo.
+        * Escenario negativo.
+        * Escenario de duplicidad.
+
+---
+
+### 9. Roles
+**Responsable:** Daiana
+
+* **Distribución:** El equipo (5 integrantes) se distribuye el diseño y la redacción de este plan por secciones, según el detalle en la tabla de cierre.
+* **Ejecución y Revisión:**
+    * Cada integrante ejecuta los casos de prueba derivados de su sección correspondiente.
+    * Participación en la revisión cruzada de las secciones de sus compañeros antes de la entrega final.
 
 ### 10. Criterios de entrada, suspensión, reanudación y salida
 
