@@ -110,110 +110,100 @@ Estas son decisiones que todavía deberían definirse durante el desarrollo del 
 8. ¿Los instructores podrán modificar o eliminar actividades después de publicarlas?
 9. ¿Qué formatos y tamaño máximo tendrán las evidencias que puedan subir los aprendices?
 
-# Taller 2 Plan de pruebas V1
+# Taller 2 — Plan de pruebas v1 (Mi Formación CTMA)
 
 ## Resumen de responsabilidades por integrante
 
-| Integrante      | Secciones   | Enfoque de su parte                                                                                                 |
-|-----------------|-------------| ------------------------------------------------------------------------------------------------------------------- |
-| Miguel Angel O  | 1, 2 y 3    | Identificación, objetivo y alcance incluido: qué decisión deben soportar las pruebas y qué entra en esta iteración. |
-| Juan Daniel P   | 4 y 5       | Fuera de alcance y base de prueba: qué queda excluido y sobre qué documentos se apoya el plan.                      |
-| Juan Jose G     | 6,7,8 y 9   | Riesgos y enfoque: prioriza el catálogo de riesgos y define niveles y tipos de prueba por riesgo.                   |
-| Juan David G    | 10, 11 y 12 | Criterios de entrada/suspensión/salida, entregables y cronograma: cuándo empezar, pausar y cerrar.                  |
+| Integrante     | Secciones | Enfoque de su parte |
+|----------------|---|---|
+| Miguel Angel O | 1, 2 y 3 | Identificación, objetivo y alcance incluido |
+| Juan Daniel P  | 4 y 5 | Fuera de alcance y base de prueba |
+| Juan Jose G    | 6, 7, 8 y 9 | Riesgos, enfoque, ambiente/datos y roles |
+| Juan Goez      | 10, 11 y 12 | Criterios de entrada/salida, entregables y cronograma |
 
 ### 1. Identificación
 
-**Producto:** EntregaSegura.
-**Documento:** Plan de pruebas v1 (borrador).
-**Responsable de esta versión:** equipo de pruebas conformado por cinco integrantes.
-**Fecha de elaboración:** 19 de agosto de 2026.
+**Producto:** Mi Formación CTMA. **Documento:** Plan de pruebas v1 (borrador). **Responsable de esta versión:** equipo de pruebas (4 integrantes). **Fecha de elaboración:** 19 de agosto de 2026.
 
 ### 2. Objetivo
 
-Las pruebas de esta iteración deben soportar la decisión de si el flujo de autenticación, autorización por rol y confirmación de entrega con evidencia fotográfica cumple los criterios de aceptación definidos para la historia **HU-ENT-01** y la regla de negocio de **no duplicidad**, antes de habilitar el paso a producción del incremento correspondiente.
+Las pruebas de esta iteración deben soportar la decisión de si el flujo de consulta de actividades (HU-CTMA-01), registro de avance (HU-CTMA-02) y publicación de actividades por el instructor (HU-CTMA-03) cumple los criterios de aceptación definidos en el README del proyecto, incluyendo las reglas de validación codificadas en `ReglasActividad.kt`, antes de considerar estable este incremento de la app.
 
 ### 3. Alcance incluido
 
-Se valida la autenticación, la autorización por rol y la confirmación de entrega con evidencia, en los navegadores **Chrome** y **Edge** de escritorio y en un dispositivo **Android** representativo.
-
+Se valida la consulta de actividades, el registro y actualización del estado de avance, la publicación de actividades por el instructor, y las reglas de negocio de `validarActividad`, `estadoActividad`, `actividadesUrgentes` y `promedioProgreso`, ejecutadas en el emulador de Android Studio y, si está disponible, en un dispositivo Android físico.
 
 ### 4. Fuera de alcance
 
-Quedan excluidas de esta iteración la **facturación**, la **integración con operadores logísticos** y las **pruebas de carga masiva**, porque no forman parte del incremento actual. Estos componentes se abordarán cuando entren en desarrollo.
-
+Quedan excluidas la autenticación real contra un servicio externo, la sincronización con un backend real, las notificaciones de fechas próximas y la carga de archivos como evidencia — todas siguen siendo preguntas abiertas sin resolver en el README, por lo que no pueden probarse todavía.
 
 ### 5. Base de prueba
 
-La historia **HU-ENT-01** con sus criterios de aceptación redactados en formato **Given-When-Then**, la regla de negocio sobre evitar duplicidad de registro y el catálogo de riesgos identificado en el taller de planificación.
-
+Las tres historias de usuario del README (Consultar actividades, Registrar avance, Publicar actividades) con sus criterios Given-When-Then, el código de `ReglasActividad.kt`, y el criterio no funcional medible del README (95% de las operaciones de consulta/actualización responden en máximo 2 segundos).
 
 ### 6. Riesgos
 
-Se priorizan según la matriz construida en el taller de planificación. Las dos primeras filas concentran el esfuerzo inicial de prueba por su exposición muy alta.
-
 | Riesgo | Prob. | Impacto | Exposición | Prioridad |
-| :--- | :---: | :---: | :---: | :--- |
-| Acceso a órdenes ajenas | 4 | 5 | 20 | Muy alta |
-| Entrega sin evidencia | 4 | 5 | 20 | Muy alta |
-| Registro duplicado por doble clic | 3 | 4 | 12 | Alta |
-| Texto desalineado en escritorio | 2 | 1 | 2 | Baja |
-
----
+|---|---|---|---|---|
+| El estado de avance no persiste tras cambiarlo | 4 | 5 | 20 | Muy alta |
+| Una actividad publicada por el instructor no aparece para el aprendiz | 3 | 5 | 15 | Alta |
+| Se guarda una actividad con título vacío o progreso fuera de rango | 3 | 4 | 12 | Alta |
+| Cálculo incorrecto de actividades urgentes (`progreso < 100` y `diasRestantes <= 3`) | 2 | 3 | 6 | Media |
+| El enlace asociado a la actividad no abre correctamente | 2 | 2 | 4 | Baja |
 
 ### 7. Enfoque
 
-Se combinan varios niveles según el riesgo asociado:
+Pruebas unitarias (JUnit) sobre las funciones puras de `ReglasActividad` sin necesidad de UI; pruebas de integración para confirmar que `TarjetaActividad` refleja el estado calculado; pruebas de sistema/UI en Compose para el flujo completo de consultar y actualizar una actividad; pruebas de aceptación con el instructor sobre el flujo de publicación; pruebas no funcionales sobre el tiempo de respuesta de 2 segundos.
 
-- **Pruebas unitarias:** Para la regla que impide guardar una entrega sin foto.
-- **Pruebas de integración:** Para confirmar que la evidencia queda asociada a la orden correcta.
-- **Pruebas de sistema o end-to-end:** Para el flujo completo de iniciar sesión, abrir la orden, adjuntar evidencia y confirmar.
-- **Pruebas de aceptación:** Para validar la política de entrega con el responsable de negocio.
+### 8. Ambiente y datos
 
-- **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
-
-- **Pruebas no funcionales:** Para tiempo de respuesta y autorización por rol.
-
-### 8. Ambiente y Datos
-**Responsable:** Daiana
-
-* **Requerimientos de Hardware y Software:**
-    * Computador con navegador Google Chrome o Microsoft Edge actualizado.
-    * Dispositivo Android representativo.
-    * Conexión a internet estable.
-    * Acceso a la documentación de requisitos y al prototipo del caso.
-
-* **Datos de Prueba:**
-    * **Cuentas de usuario:** Al menos dos roles configurados:
-        * Mensajero con orden asignada.
-        * Mensajero sin asignación.
-    * **Órdenes:** Datos ficticios para cubrir los siguientes escenarios:
-        * Escenario positivo.
-        * Escenario negativo.
-        * Escenario de duplicidad.
-
----
+Android Studio con emulador (o dispositivo Android físico), conexión a internet estable, acceso al código y al README del proyecto. Datos de prueba: actividades ficticias que cubran título vacío, progreso en 0/50/100, y días restantes negativos/positivos; cuentas simuladas de rol aprendiz e instructor, ya que la autenticación real aún no está definida.
 
 ### 9. Roles
-**Responsable:** Daiana
 
-* **Distribución:** El equipo (5 integrantes) se distribuye el diseño y la redacción de este plan por secciones, según el detalle en la tabla de cierre.
-* **Ejecución y Revisión:**
-    * Cada integrante ejecuta los casos de prueba derivados de su sección correspondiente.
-    * Participación en la revisión cruzada de las secciones de sus compañeros antes de la entrega final.
+El equipo (4 integrantes) se distribuye el diseño y la redacción de este plan por secciones según la tabla de cierre. Cada integrante ejecuta los casos derivados de su sección y participa en la revisión cruzada antes de la entrega final.
 
 ### 10. Criterios de entrada, suspensión, reanudación y salida
 
 | Categoría | Ejemplo |
-| :--- | :--- |
-| **Entrada** | Historias y criterios revisados; ambiente desplegado; usuarios y datos disponibles; versión identificada. |
-| **Suspensión** | Ambiente inestable; bloqueo de autenticación; datos corruptos; más del 30% de casos bloqueados por la misma causa. |
-| **Reanudación** | Corrección desplegada; *smoke test* aprobado; datos restaurados; incidente documentado. |
-| **Salida** | 100% de casos críticos ejecutados; cero defectos críticos abiertos; riesgos residuales aceptados y comunicados. |
+|---|---|
+| Entrada | Historias y criterios revisados; proyecto compila sin errores; emulador configurado; versión identificada. |
+| Suspensión | La app no compila; el emulador falla repetidamente; datos de prueba corruptos; más del 30% de casos bloqueados por la misma causa. |
+| Reanudación | Corrección aplicada; build exitoso; smoke test aprobado. |
+| Salida | 100% de casos críticos ejecutados; cero defectos críticos abiertos; riesgos residuales aceptados y comunicados. |
 
 ### 11. Entregables
 
-Casos de prueba diseñados y ejecutados, evidencias de ejecución, registro de defectos encontrados, métricas de cobertura y avance, e informe breve de cierre para la revisión entre pares.
+Casos de prueba diseñados y ejecutados, evidencias de ejecución (capturas del emulador), registro de defectos encontrados, métricas de cobertura y avance, e informe breve de cierre para la revisión entre pares.
 
 ### 12. Cronograma
 
-Dentro de los 90 minutos que la guía asigna al taller de planificación: aproximadamente 20 minutos para consolidar la matriz de riesgos, 40 minutos para redactar las 12 secciones del plan en paralelo entre los cinco integrantes, y 30 minutos para integrar el trabajo del equipo y revisarlo antes de pasar a la actividad 5 (revisión entre pares, 45 minutos).
+Dentro de los 90 minutos asignados: 20 minutos para consolidar la matriz de riesgos, 40 minutos para redactar las 12 secciones en paralelo, y 30 minutos para integrar y revisar antes de la revisión entre pares.
+
+---
+# Semana 3 — Diseño de casos de prueba y gestión de defectos (Mi Formación CTMA)
+
+## 0. Activación
+
+- **Criterios de partida:** HU-CTMA-03/CA1 (el instructor registra una actividad con título, descripción y fecha de entrega) y HU-CTMA-02/CA1-CA2 (el aprendiz cambia el estado a "En progreso" y luego a "Completada").
+- **Riesgo asociado:** se guarda una actividad con título vacío o progreso fuera de rango — probabilidad 3, impacto 4, exposición 12, prioridad Alta.
+- **Preguntas de diseño:**
+    1. ¿Qué pasa si el instructor intenta guardar una actividad con el título vacío o solo con espacios?
+    2. ¿Qué progreso mínimo y máximo son válidos, y qué ocurre justo en esos límites (0 y 100)?
+    3. ¿El estado "Completada" impide que el progreso se reduzca después, o el sistema lo permite sin advertencia?
+    4. ¿Qué ocurre si `diasRestantes` es negativo en una actividad que ya tiene progreso 100?
+- **Escenario que debería aprobarse:** título "Entrega final", progreso 50, `diasRestantes` 3 → se guarda y el estado calculado es "En proceso".
+- **Escenario que debería rechazarse:** título vacío → `validarActividad` devuelve el error correspondiente y la actividad no se guarda.
+
+## 1. Laboratorio 1 — 12 casos de prueba
+
+### Responsable: Miguel Angel O — HU-CTMA-03, validación de creación de actividad (partición y valores límite sobre título y `diasRestantes`)
+
+| ID | Referencia | Técnica | Tipo | Datos | Resultado esperado | Prioridad |
+|---|---|---|---|---|---|---|
+| CP-CTMA-01 | HU-CTMA-03/CA1 | Partición de equivalencia | Positiva | Título "Entrega final", diasRestantes=5 | Se guarda sin errores | Alta |
+| CP-CTMA-02 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "" (vacío) | Error: "El título es obligatorio." | Alta |
+| CP-CTMA-03 | HU-CTMA-03/CA1 | Valores límite | Negativa | diasRestantes = -1 | Error: "Los días restantes no pueden ser negativos." | Alta |
+| CP-CTMA-04 | HU-CTMA-03/CA1 | Valores límite | Positiva | diasRestantes = 0 (límite mínimo exacto) | Se guarda sin errores | Alta |
+| CP-CTMA-05 | HU-CTMA-03/CA1 | Partición de equivalencia | Positiva | Título válido, descripción = null | Se guarda correctamente (descripción es opcional) | Media |
+| CP-CTMA-06 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "   " (solo espacios) | Error: "El título es obligatorio." (`isBlank()` lo detecta) | Alta |
