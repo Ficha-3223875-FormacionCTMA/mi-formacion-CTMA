@@ -207,3 +207,17 @@ Dentro de los 90 minutos asignados: 20 minutos para consolidar la matriz de ries
 | CP-CTMA-04 | HU-CTMA-03/CA1 | Valores límite | Positiva | diasRestantes = 0 (límite mínimo exacto) | Se guarda sin errores | Alta |
 | CP-CTMA-05 | HU-CTMA-03/CA1 | Partición de equivalencia | Positiva | Título válido, descripción = null | Se guarda correctamente (descripción es opcional) | Media |
 | CP-CTMA-06 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "   " (solo espacios) | Error: "El título es obligatorio." (`isBlank()` lo detecta) | Alta |
+
+--- 
+# Semana 4: Estado, formularios y navegación
+
+![diagrama quien posea el estado del formulario](diagrama1.png)
+
+### Punto 1 — ¿Quién posee el estado?
+
+FormularioRoute es el dueño: ahí viven titulo y descripcion como rememberSaveable, porque son datos de interfaz pequeños que deben sobrevivir a una rotación pero no a un cierre de la app. FormularioActividad es stateless — no guarda nada, solo recibe value y comunica intención hacia arriba mediante onTituloChange, onDescripcionChange y onGuardarClick. Esto es justo el "flujo unidireccional" del punto 3 de la guía: el estado baja, los eventos suben, y nunca al revés.
+
+Esta separación es la razón por la que FormularioActividad se puede probar y reutilizar sin depender de dónde vive el estado — igual que TarjetaActividad en la Semana 3 no sabía nada sobre ReglasActividad, solo recibía la actividad ya resuelta.
+
+### Punto 2 - Funcion validarTitulo y pruebas manuales 
+![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
