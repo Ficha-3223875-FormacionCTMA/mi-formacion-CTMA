@@ -239,3 +239,17 @@ Derivada directamente de la lógica real de `estadoActividad()`:
 
 * **CP-CTMA-13:** `progreso = 0`, `diasRestantes = -2` → estado **"Vencida"**.
 * **CP-CTMA-14:** `progreso = 0`, `diasRestantes = 3` → estado **"Pendiente"**.
+
+#### 2. Modelo de transición de estados
+
+A diferencia de un sistema con estado persistente, aquí el estado se **calcula** a partir de `progreso` y `diasRestantes` — no hay un campo de estado guardado ni eventos que lo cambien directamente. Por eso las "transiciones" representan cambios válidos o inválidos en esos dos valores:
+
+| Transición (cambio de datos) | ¿Válida? | Caso |
+|---|---|---|
+| Pendiente → En proceso (progreso pasa de 0 a >0) | Sí | CP-CTMA-09 |
+| En proceso → Completada (progreso pasa a 100) | Sí | CP-CTMA-10 |
+| Pendiente/En proceso → Vencida (diasRestantes baja de 0) | Sí | CP-CTMA-13 |
+| Completada → progreso se reduce (ej. de 100 a 40) | **No debería permitirse, pero el código no lo bloquea** | CP-CTMA-15 (nuevo) |
+| Completada con diasRestantes vuelto negativo | **El estado sigue mostrando "Completada" y oculta el atraso** | CP-CTMA-16 (nuevo) |
+
+Las últimas dos son las "transiciones inválidas" que pide la guía — pero en este caso no son errores de código que rechacen la acción, sino **huecos de validación reales** que encontramos al revisar `ReglasActividad.kt`: no existe ninguna regla que impida bajar el progreso de una actividad completada, ni que avise si sus días restantes se volvieron negativos después de completarla.
