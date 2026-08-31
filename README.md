@@ -253,3 +253,11 @@ A diferencia de un sistema con estado persistente, aquí el estado se **calcula*
 | Completada con diasRestantes vuelto negativo | **El estado sigue mostrando "Completada" y oculta el atraso** | CP-CTMA-16 (nuevo) |
 
 Las últimas dos son las "transiciones inválidas" que pide la guía — pero en este caso no son errores de código que rechacen la acción, sino **huecos de validación reales** que encontramos al revisar `ReglasActividad.kt`: no existe ninguna regla que impida bajar el progreso de una actividad completada, ni que avise si sus días restantes se volvieron negativos después de completarla.
+
+#### 3. Caso de uso: Registrar avance de una actividad
+
+- **Actor principal:** Aprendiz autenticado.
+- **Flujo principal:** Abre actividad → selecciona "En progreso" → progreso se actualiza y se guarda → luego selecciona "Completada" → progreso pasa a 100 → estado se recalcula.
+- **Alterno A:** El aprendiz cierra la app antes de guardar → al reabrir, debe conservar el último estado guardado (HU-CTMA-02/CA3).
+- **Excepción B:** Se intenta fijar un progreso fuera de 0–100 → `validarActividad` rechaza el cambio.
+- **Excepción C:** Se intenta actualizar una actividad que el instructor ya eliminó → debería informarse que ya no está disponible (pregunta abierta del README, aún sin definir).
