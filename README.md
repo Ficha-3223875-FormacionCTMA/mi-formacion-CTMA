@@ -209,18 +209,6 @@ Dentro de los 90 minutos asignados: 20 minutos para consolidar la matriz de ries
 | CP-CTMA-06 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "   " (solo espacios) | Error: "El título es obligatorio." (`isBlank()` lo detecta) | Alta |
 
 --- 
-# Semana 4: Estado, formularios y navegación
-
-![diagrama quien posea el estado del formulario](diagrama1.png)
-
-### Punto 1 — ¿Quién posee el estado?
-
-FormularioRoute es el dueño: ahí viven titulo y descripcion como rememberSaveable, porque son datos de interfaz pequeños que deben sobrevivir a una rotación pero no a un cierre de la app. FormularioActividad es stateless — no guarda nada, solo recibe value y comunica intención hacia arriba mediante onTituloChange, onDescripcionChange y onGuardarClick. Esto es justo el "flujo unidireccional" del punto 3 de la guía: el estado baja, los eventos suben, y nunca al revés.
-
-Esta separación es la razón por la que FormularioActividad se puede probar y reutilizar sin depender de dónde vive el estado — igual que TarjetaActividad en la Semana 3 no sabía nada sobre ReglasActividad, solo recibía la actividad ya resuelta.
-
-### Punto 2 - Funcion validarTitulo y pruebas manuales 
-![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
 
 ## 2. Laboratorio 2 — Tabla de decisión y transición de estados
 
@@ -261,3 +249,17 @@ Las últimas dos son las "transiciones inválidas" que pide la guía — pero en
 - **Alterno A:** El aprendiz cierra la app antes de guardar → al reabrir, debe conservar el último estado guardado (HU-CTMA-02/CA3).
 - **Excepción B:** Se intenta fijar un progreso fuera de 0–100 → `validarActividad` rechaza el cambio.
 - **Excepción C:** Se intenta actualizar una actividad que el instructor ya eliminó → debería informarse que ya no está disponible (pregunta abierta del README, aún sin definir).
+
+# Semana 4: Estado, formularios y navegación
+
+![diagrama quien posea el estado del formulario](diagrama1.png)
+
+### Punto 1 — ¿Quién posee el estado?
+
+FormularioRoute es el dueño: ahí viven titulo y descripcion como rememberSaveable, porque son datos de interfaz pequeños que deben sobrevivir a una rotación pero no a un cierre de la app. FormularioActividad es stateless — no guarda nada, solo recibe value y comunica intención hacia arriba mediante onTituloChange, onDescripcionChange y onGuardarClick. Esto es justo el "flujo unidireccional" del punto 3 de la guía: el estado baja, los eventos suben, y nunca al revés.
+
+Esta separación es la razón por la que FormularioActividad se puede probar y reutilizar sin depender de dónde vive el estado — igual que TarjetaActividad en la Semana 3 no sabía nada sobre ReglasActividad, solo recibía la actividad ya resuelta.
+
+### Punto 2 - Funcion validarTitulo y pruebas manuales 
+![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
+
