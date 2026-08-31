@@ -17,15 +17,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +33,7 @@ import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
 import com.example.miformacionctma.domain.ReglasActividad
 import com.example.miformacionctma.ui.TarjetaActividad
+import com.example.miformacionctma.ui.GrafoNavegacion
 import com.example.miformacionctma.ui.theme.MiFormacionCTMATheme
 import androidx.compose.material3.Button
 import androidx.compose.runtime.getValue
@@ -140,7 +141,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MiFormacionCTMATheme {
-                PantallaInicio(resumen = resumen, actividades = actividades)
+                GrafoNavegacion(actividades = actividades)
             }
         }
     }
@@ -152,8 +153,6 @@ fun PantallaInicio(
     resumen: String,
     actividades: List<ActividadFormativa>
 ) {
-    val scrollState = rememberScrollState()
-
     // Estado de demostración para la Parte 7 (recomposición)
     var actividadDemo by remember {
         mutableStateOf(
@@ -168,161 +167,77 @@ fun PantallaInicio(
         )
     }
 
-    Column(
+    // Detectamos el ancho de la pantalla para adaptar las columnas
+    val configuration = LocalConfiguration.current
+    val nColumnas = if (configuration.screenWidthDp >= 600) 2 else 1
+
+    // LazyVerticalGrid es ahora el contenedor de scroll principal
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(nColumnas),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp)
-            .verticalScroll(scrollState)
+            .padding(horizontal = 24.dp)
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Encabezado principal con imagen decorativa
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                contentDescription = null, // Decisión semántica documentada
-                modifier = Modifier.size(48.dp)
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = "Mi Formación CTMA",
-                style = MaterialTheme.typography.headlineMedium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        Text(text = "Hola, $nombre")
-        Text(text = "Aquí organizarás actividades y evidencias.")
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = resumen,
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Mis actividades",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        if (actividades.isEmpty()) {
-            EstadoVacioActividades()
-        } else {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val columnas = if (maxWidth >= 600.dp) 2 else 1
-                val filas = (actividades.size + columnas - 1) / columnas
-                val alturaCalculada = (filas * 160).dp
-
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(columnas),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    userScrollEnabled = false,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(alturaCalculada)
-                ) {
-                    items(
-                        items = actividades,
-                        key = { actividad -> actividad.id }
-                    ) { actividad ->
-                        TarjetaActividad(actividad = actividad, onClick = {})
-                    }
+        // 1. Encabezado y Resumen (ocupan todo el ancho)
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Column {
+                Spacer(modifier = Modifier.height(32.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Mi Formación CTMA",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
                 }
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = "Hola, $nombre")
+                Text(text = "Aquí organizarás actividades y evidencias.")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = resumen, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(text = "Mis actividades", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-        /*
-                // Sección 1: Valores del Manifiesto Ágil
-                Text(
-                    text = """
-                    Valores del Manifiesto Ágil
-
-                    • Individuos e interacciones:
-                    La comunicación del equipo es más importante que las herramientas.
-
-                    • Software funcionando:
-                    Es mejor una aplicación que funcione que mucha documentación.
-
-                    • Colaboración con el cliente:
-                    Trabajar junto al cliente permite obtener mejores resultados.
-
-                    • Respuesta ante el cambio:
-                    Adaptarse a los cambios ayuda a mejorar el proyecto.
-                    """.trimIndent(),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Sección 2: Fundamentos de Scrum
-                Text(
-                    text = """
-                    ¿Qué es Scrum?
-                    Es un marco de trabajo ágil para desarrollar proyectos en ciclos cortos y repetitivos (de 2 a 4 semanas) llamados Sprints.
-
-                    Roles
-                    • Product Owner: Prioriza lo que se debe hacer (representa al cliente).
-                    • Scrum Master: Facilita el proceso y elimina bloqueos.
-                    • Developers: Diseñan, programan y prueban el producto.
-
-                    Artefactos
-                    • Product Backlog: Lista general de todo lo que requiere el proyecto.
-                    • Sprint Backlog: Tareas seleccionadas para trabajar en el Sprint actual.
-                    • Incremento: La versión funcional y terminada del producto al final del Sprint.
-
-                    Ceremonias
-                    • Sprint Planning: Definir qué se hará en el Sprint.
-                    • Daily Scrum: Reunión diaria de 15 min para sincronizar avances.
-                    • Sprint Review: Mostrar el producto terminado a los interesados.
-                    • Sprint Retrospective: Evaluar cómo trabajó el equipo para mejorar en el siguiente ciclo.
-                    """.trimIndent(),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-        Sección 3: Pruebas de Software
-        Text(
-            text = """
-            Pruebas de Software
-            Proceso de verificar que la app funcione bien, no tenga fallas y cumpla con lo esperado.
-
-            Principales Tipos de Pruebas:
-            • Unitarias: Prueban pequeñas partes de código de forma aislada (ej. funciones o cálculos).
-            • De Integración: Verifican que varios componentes funcionen correctamente juntos.
-            • De Interfaz / UI: Comprueban que los elementos visuales y pantallas se muestren e interactúen bien.
-            • Funcionales: Validan que el sistema completo cumpla con los requisitos del usuario.
-            s""".trimIndent(),
-            style = MaterialTheme.typography.bodyMedium
-        ) */
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-// Demostración de recomposición (Parte 7 de la práctica)
-        Text(
-            text = "Demostración de recomposición",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        TarjetaActividad(actividad = actividadDemo, onClick = {})
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { actividadDemo = actividadDemo.copy(progreso = 100) }) {
-            Text("Cambiar progreso a 100")
+        // 2. Lista de Actividades o Estado Vacío
+        if (actividades.isEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                EstadoVacioActividades()
+            }
+        } else {
+            items(
+                items = actividades,
+                key = { it.id }
+            ) { actividad ->
+                TarjetaActividad(actividad = actividad, onClick = {})
+            }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        // 3. Sección de Demostración (ocupa todo el ancho)
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Column {
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Demostración de recomposición",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TarjetaActividad(actividad = actividadDemo, onClick = {})
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { actividadDemo = actividadDemo.copy(progreso = 100) }) {
+                    Text("Cambiar progreso a 100")
+                }
+                Spacer(modifier = Modifier.height(32.dp))
+            }
+        }
     }
 }
 
