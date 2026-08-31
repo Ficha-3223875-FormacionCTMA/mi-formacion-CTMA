@@ -221,3 +221,21 @@ Esta separación es la razón por la que FormularioActividad se puede probar y r
 
 ### Punto 2 - Funcion validarTitulo y pruebas manuales 
 ![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
+
+## 2. Laboratorio 2 — Tabla de decisión y transición de estados
+
+### Responsable: Laverde
+
+#### 1. Tabla de decisión
+Derivada directamente de la lógica real de `estadoActividad()`:
+
+| Condición | R1 | R2 | R3 | R4 |
+|---|---|---|---|---|
+| `progreso == 100` | Sí | No | No | No |
+| `progreso > 0` | – | Sí | No | No |
+| `diasRestantes < 0` | – | – | Sí | No |
+| **Estado resultante** | **Completada** | **En proceso** | **Vencida** | **Pendiente** |
+| **Caso derivado** | **CP-CTMA-10** | **CP-CTMA-09** | **CP-CTMA-13 (nuevo)** | **CP-CTMA-14 (nuevo)** |
+
+* **CP-CTMA-13:** `progreso = 0`, `diasRestantes = -2` → estado **"Vencida"**.
+* **CP-CTMA-14:** `progreso = 0`, `diasRestantes = 3` → estado **"Pendiente"**.
