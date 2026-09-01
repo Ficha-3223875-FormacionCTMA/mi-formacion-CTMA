@@ -263,3 +263,44 @@ Esta separación es la razón por la que FormularioActividad se puede probar y r
 ### Punto 2 - Funcion validarTitulo y pruebas manuales 
 ![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
 
+## 3.Persistencia ante recreación y Back Stack
+
+#### Punto 5: Prueba de rotación con borrador (`rememberSaveable`)
+
+* **Objetivo:** Verificar que el estado del formulario sobreviva a la recreación de la Activity provocada por la rotación de pantalla[cite: 2].
+* **Mecanismo:** Se implementó `rememberSaveable` en el composable del formulario (`FormularioRoute` / `FormularioActividad`) para variables de estado como `titulo` y `descripcion`[cite: 2].
+* **Procedimiento:**
+  1. Se inició la aplicación y se navegó hacia la pantalla de formulario (**CrearRoute**)[cite: 2].
+  2. Se ingresaron datos parciales en los campos (ej. *Título:* `"Avance proyecto CTMA"` y *Descripción:* `"Prueba de rotación..."`).
+  3. Se rotó la pantalla del dispositivo (de orientación Vertical a Horizontal).
+* **Resultado observado:** El estado de la UI no se reinició; el texto ingresado en los campos se **conservó intacto** gracias al mecanismo de `SavedInstanceState` que gestiona `rememberSaveable`[cite: 2].
+
+---
+
+#### Punto 6: Dibujo del Back Stack (6 acciones definidas por Arrunchis)
+
+A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchis**, el comportamiento de la pila de navegación (*Back Stack*) evoluciona de la siguiente manera[cite: 2]:
+
+1. **Acción 1: Abrir la aplicación**
+  * *Operación:* `StartDestination`
+  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+2. **Acción 2: Navegar a la pantalla de Crear Actividad**
+  * *Operación:* `navController.navigate(CrearRoute)`
+  * *Back Stack:* `[ ListaRoute, CrearRoute ]`[cite: 2]
+
+3. **Acción 3: Guardar el borrador y volver**
+  * *Operación:* `navController.popBackStack()`
+  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+4. **Acción 4: Seleccionar e ingresar al Detalle de la actividad (ID: 42)**
+  * *Operación:* `navController.navigate(DetalleRoute(id = "42"))`
+  * *Back Stack:* `[ ListaRoute, DetalleRoute("42") ]`[cite: 2]
+
+5. **Acción 5: Presionar el botón Atrás**
+  * *Operación:* `navController.popBackStack()`
+  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+6. **Acción 6: Volver a presionar Atrás para salir / minimizar la app**
+  * *Operación:* `navController.popBackStack()`
+  * *Back Stack:* `[ ]`
