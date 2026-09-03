@@ -250,6 +250,64 @@ Las últimas dos son las "transiciones inválidas" que pide la guía — pero en
 - **Excepción B:** Se intenta fijar un progreso fuera de 0–100 → `validarActividad` rechaza el cambio.
 - **Excepción C:** Se intenta actualizar una actividad que el instructor ya eliminó → debería informarse que ya no está disponible (pregunta abierta del README, aún sin definir).
 
+* Con base en la revisión que hicimos del código de ReglasActividad.kt, es muy probable que CP-CTMA-15 y CP-CTMA-16 fallen al ejecutarlos (porque confirmamos que no existe la validación correspondiente), mientras que el resto de los casos —título vacío, rangos de progreso, días restantes negativos— deberían pasar, ya que sí están correctamente implementados. Aun así, hay que ejecutarlos todos para confirmarlo, no asumirlo.
+
+*Reporte de defecto completo (a partir de CP-CTMA-15):*
+
+| Campo | Contenido |
+|---|---|
+| ID | BUG-CTMA-01 |
+| Título | El sistema permite reducir el progreso de una actividad ya "Completada" sin advertencia |
+| Ambiente | Emulador Android Studio, build actual de Mi Formación CTMA |
+| Referencia | HU-CTMA-02 / CP-CTMA-15 |
+| Precondición | Actividad con progreso=100 (estado "Completada") ya guardada |
+| Pasos | 1) Abrir la actividad completada. 2) Cambiar su progreso a 40. 3) Guardar. |
+| Resultado esperado | El sistema debería impedir o advertir sobre la reducción de progreso de una actividad completada (regla de negocio a definir) |
+| Resultado real | validarActividad solo verifica que progreso esté entre 0 y 100; no hay regla que impida que un valor ya completado disminuya |
+| Severidad / Prioridad | Media / P3 (brecha de regla de negocio no definida, no es pérdida de datos ni de seguridad) |
+| Evidencia | Captura del progreso antes (100%) y después (40%) del cambio |
+| Estado inicial | Nuevo |
+
+## 4. Matriz de trazabilidad actualizada
+
+| Historia | Criterio | Riesgo | Casos | Prioridad | Resultado | Defecto |
+|---|---|---|---|---|---|---|
+| HU-CTMA-03 | CA1 Título obligatorio | Actividad guardada sin título válido | CP-CTMA-01, 02, 05, 06 | Alta | Diseñado | — |
+| HU-CTMA-03 | CA1 Días restantes válidos | Días restantes negativos aceptados | CP-CTMA-03, 04 | Alta | Diseñado | — |
+| HU-CTMA-02 | CA1/CA2 Progreso y estado | Cálculo de estado incorrecto | CP-CTMA-07 a 11, 13, 14 | Muy alta | Diseñado | — |
+| HU-CTMA-02 | CA2 Marcar completada | Regresión de progreso no bloqueada | CP-CTMA-15 | Media | Ejecutado: falla (a confirmar) | BUG-CTMA-01 |
+| HU-CTMA-02 | CA3 Persistencia de estado | Días restantes negativos ocultos tras completar | CP-CTMA-16 | Media | Pendiente de ejecución | — |
+
+### Responsable: Juan Goez
+
+* Con base en la revisión que hicimos del código de ReglasActividad.kt, es muy probable que CP-CTMA-15 y CP-CTMA-16 fallen al ejecutarlos (porque confirmamos que no existe la validación correspondiente), mientras que el resto de los casos —título vacío, rangos de progreso, días restantes negativos— deberían pasar, ya que sí están correctamente implementados. Aun así, hay que ejecutarlos todos para confirmarlo, no asumirlo.
+
+*Reporte de defecto completo (a partir de CP-CTMA-15):*
+
+| Campo | Contenido |
+|---|---|
+| ID | BUG-CTMA-01 |
+| Título | El sistema permite reducir el progreso de una actividad ya "Completada" sin advertencia |
+| Ambiente | Emulador Android Studio, build actual de Mi Formación CTMA |
+| Referencia | HU-CTMA-02 / CP-CTMA-15 |
+| Precondición | Actividad con progreso=100 (estado "Completada") ya guardada |
+| Pasos | 1) Abrir la actividad completada. 2) Cambiar su progreso a 40. 3) Guardar. |
+| Resultado esperado | El sistema debería impedir o advertir sobre la reducción de progreso de una actividad completada (regla de negocio a definir) |
+| Resultado real | validarActividad solo verifica que progreso esté entre 0 y 100; no hay regla que impida que un valor ya completado disminuya |
+| Severidad / Prioridad | Media / P3 (brecha de regla de negocio no definida, no es pérdida de datos ni de seguridad) |
+| Evidencia | Captura del progreso antes (100%) y después (40%) del cambio |
+| Estado inicial | Nuevo |
+
+## 4. Matriz de trazabilidad actualizada
+
+| Historia | Criterio | Riesgo | Casos | Prioridad | Resultado | Defecto |
+|---|---|---|---|---|---|---|
+| HU-CTMA-03 | CA1 Título obligatorio | Actividad guardada sin título válido | CP-CTMA-01, 02, 05, 06 | Alta | Diseñado | — |
+| HU-CTMA-03 | CA1 Días restantes válidos | Días restantes negativos aceptados | CP-CTMA-03, 04 | Alta | Diseñado | — |
+| HU-CTMA-02 | CA1/CA2 Progreso y estado | Cálculo de estado incorrecto | CP-CTMA-07 a 11, 13, 14 | Muy alta | Diseñado | — |
+| HU-CTMA-02 | CA2 Marcar completada | Regresión de progreso no bloqueada | CP-CTMA-15 | Media | Ejecutado: falla (a confirmar) | BUG-CTMA-01 |
+| HU-CTMA-02 | CA3 Persistencia de estado | Días restantes negativos ocultos tras completar | CP-CTMA-16 | Media | Pendiente de ejecución | — |
+
 # Semana 4: Estado, formularios y navegación
 
 ![diagrama quien posea el estado del formulario](diagrama1.png)
