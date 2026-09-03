@@ -11,10 +11,10 @@ class ValidacionFormularioTest {
     }
 
     @Test
-    fun `CP-VAL-02 titulo de 2 caracteres es muy corto`() {
-        assertEquals("Usa al menos 3 caracteres", validarTitulo("Ab", mostrarVacio = true))
+    fun `CP-VAL-02 titulo de 3 caracteres o menos es muy corto`() {
+        val resultado = validarTitulo("AB", mostrarVacio = true)
+        assertEquals("Usa al menos 3 caracteres", resultado)
     }
-
     @Test
     fun `CP-VAL-03 titulo de 3 caracteres es valido (limite minimo)`() {
         assertEquals(null, validarTitulo("Abc", mostrarVacio = true))
