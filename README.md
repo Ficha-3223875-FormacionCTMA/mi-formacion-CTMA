@@ -18,38 +18,175 @@ Actualmente, los aprendices administran sus actividades académicas, enlaces de 
 
 ### Historia de usuario 1 — Consultar actividades
 
-**Como aprendiz**, quiero consultar mis actividades registradas para conocer la información y los recursos asociados a cada una.
+HU-01 - Consultar actividades
 
-**Criterios de aceptación:**
+Como aprendiz,
+quiero consultar mis actividades registradas,
+para conocer la información y los recursos asociados a cada una.
 
-* **Dado que** el aprendiz ha iniciado sesión, **cuando** acceda a la pantalla principal, **entonces** deberá visualizar sus actividades registradas.
-* **Dado que** existen actividades registradas, **cuando** el aprendiz consulte una actividad, **entonces** deberá visualizar como mínimo su título, descripción y fecha de entrega.
-* **Dado que** una actividad contiene un enlace, **cuando** el aprendiz consulte dicha actividad, **entonces** deberá poder acceder al enlace correspondiente.
+Criterios de aceptación
 
+CA-01.1
+Al acceder a la pantalla principal se muestran las actividades registradas.
+
+CA-01.2
+Cada actividad muestra como mínimo título, descripción y fecha de entrega.
+
+CA-01.3
+Si la actividad contiene un enlace, se puede acceder a él.
+
+CA-01.4
+Si se navega a un id de actividad que no existe, se muestra un estado recuperable en vez de un cierre inesperado.
+
+Riesgos relacionados
+- R-02
+- R-08
+
+Casos de prueba relacionados
+- TC-01
+- TC-02
+- TC-03
+- TC-21
+- TC-22
 ---
 
 ### Historia de usuario 2 — Registrar avance
 
-**Como aprendiz**, quiero actualizar el estado de mis actividades para llevar un seguimiento de mi progreso.
+HU-02 - Registrar avance
 
-**Criterios de aceptación:**
+Como aprendiz,
+quiero actualizar el estado de mis actividades,
+para llevar un seguimiento de mi progreso.
 
-* **Dado que** el aprendiz ha seleccionado una actividad, **cuando** cambie su estado a **"En progreso"**, **entonces** la aplicación deberá guardar y mostrar el nuevo estado.
-* **Dado que** una actividad se encuentra en progreso, **cuando** el aprendiz la marque como **"Completada"**, **entonces** la aplicación deberá actualizar y guardar el estado.
-* **Dado que** el aprendiz vuelva a consultar una actividad cuyo estado fue modificado, **cuando** acceda a ella, **entonces** deberá visualizar el último estado guardado.
+Criterios de aceptación
 
+CA-02.1
+Al cambiar el progreso de una actividad, la aplicación guarda y muestra el nuevo estado calculado.
+
+CA-02.2
+Al alcanzar progreso 100, la actividad se marca y se guarda como "Completada".
+
+CA-02.3
+Al volver a consultar una actividad modificada, se muestra el último estado guardado.
+
+CA-02.4
+Si el progreso es 0 y los días restantes son negativos, el estado calculado debe reflejar que la actividad está vencida.
+
+Riesgos relacionados
+- R-01
+- R-04
+- R-05
+
+Casos de prueba relacionados
+- TC-04
+- TC-05
+- TC-06
+- TC-07
+- TC-08
 ---
 
 ### Historia de usuario 3 — Publicar actividades
 
-**Como instructor**, quiero registrar y publicar actividades para que los aprendices puedan consultar la información y los recursos correspondientes.
+HU-03 - Publicar actividades
 
-**Criterios de aceptación:**
+Como instructor,
+quiero registrar y publicar actividades,
+para que los aprendices puedan consultar la información y los recursos correspondientes.
 
-* **Dado que** el instructor ha iniciado sesión, **cuando** registre una actividad con título, descripción y fecha de entrega, **entonces** la aplicación deberá almacenarla correctamente.
-* **Dado que** el instructor ha registrado una actividad, **cuando** agregue recursos o criterios de evaluación, **entonces** estos deberán quedar asociados a la actividad.
-* **Dado que** una actividad ha sido publicada, **cuando** un aprendiz consulte sus actividades, **entonces** deberá poder visualizar la información publicada por el instructor.
+Criterios de aceptación
 
+CA-03.1
+Una actividad solo se almacena si tiene título válido (mínimo 3, máximo 80 caracteres) y días restantes no negativos.
+
+CA-03.2
+Los recursos o criterios de evaluación agregados quedan asociados a la actividad.
+
+CA-03.3
+Una actividad publicada es visible cuando el aprendiz consulta sus actividades.
+
+Riesgos relacionados
+- R-02
+- R-03
+
+Casos de prueba relacionados
+- TC-09
+- TC-10
+- TC-11
+- TC-12
+- TC-13
+- TC-14
+---
+
+### Historia de usuario 4 — Iniciar Sesion
+
+HU-04 - Iniciar sesión
+
+Como aprendiz o instructor,
+quiero iniciar sesión con mis credenciales,
+para acceder a las actividades y funciones correspondientes a mi rol.
+
+Criterios de aceptación
+
+CA-04.1
+Con credenciales válidas, el sistema da acceso a la pantalla principal según el rol del usuario.
+
+CA-04.2
+Con credenciales inválidas, el sistema muestra un mensaje de error y no permite el acceso.
+
+Riesgos relacionados
+- R-06
+
+Casos de prueba relacionados
+- TC-15
+- TC-16
+- TC-23
+- TC-24
+---
+### Historia de usuario 5 — Buscar actividad por título
+
+HU-05 - Buscar actividad por título
+
+Como aprendiz,
+quiero buscar una actividad escribiendo parte de su título,
+para encontrarla rápidamente sin desplazarme por toda la lista.
+
+Criterios de aceptación
+
+CA-05.1
+Al escribir un texto parcial, se muestran solo las actividades cuyo título lo contiene.
+
+CA-05.2
+Si ninguna actividad coincide con el texto buscado, se muestra un estado vacío de "sin resultados".
+
+Riesgos relacionados
+- R-07
+
+Casos de prueba relacionados
+- TC-17
+- TC-18
+---
+### Historia de usuario 6 — Ver actividades urgentes
+
+HU-06 - Ver actividades urgentes
+
+Como aprendiz,
+quiero identificar cuáles de mis actividades son urgentes,
+para priorizar mi tiempo antes de que venzan.
+
+Criterios de aceptación
+
+CA-06.1
+Una actividad con progreso menor a 100 y máximo 3 días restantes se marca como urgente.
+
+CA-06.2
+Una actividad completada no se marca como urgente sin importar los días restantes.
+
+Riesgos relacionados
+(ninguno registrado todavía en RIESGOS.md)
+
+Casos de prueba relacionados
+- TC-19
+- TC-20
 ### Criterios no funcional medible
 
 ### Identificacion de dependencias, supuestos y preguntas abiertas
