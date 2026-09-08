@@ -1,0 +1,640 @@
+{
+  "info": {
+    "_postman_id": "c3a9f81d-7a32-4b2e-a5e2-9b2f1e2a3b4c",
+    "name": "Mi Formación CTMA - Semana 4",
+    "description": "Colección simulada para pruebas de integración sobre la API hipotética de Mi Formación CTMA mediante Postman Mock Server.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://YOUR-MOCK-SERVER-ID.mock.pstmn.io",
+      "type": "string"
+    },
+    {
+      "key": "activityId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "mock-token-123",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Respuesta contiene token y usuario', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('token');",
+                  "    pm.expect(jsonData).to.have.property('usuario');",
+                  "    pm.expect(jsonData.usuario).to.have.property('rol', 'APRENDIZ');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Successful Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"usuario@example.com\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"token\": \"mock-token-123\",\n  \"usuario\": {\n    \"id\": 1,\n    \"nombre\": \"Usuario de prueba\",\n    \"rol\": \"APRENDIZ\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Retorna el perfil del usuario autenticado', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData).to.have.property('nombre');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Profile Info",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"nombre\": \"Usuario de prueba\",\n  \"rol\": \"APRENDIZ\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Actividades",
+      "item": [
+        {
+          "name": "GET /actividades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Respuesta es una lista de actividades con atributos obligatorios', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData[0]).to.have.property('titulo');",
+                  "    pm.expect(jsonData[0]).to.have.property('estado');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - List of Activities",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/actividades",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Desarrollar aplicación Android\",\n    \"descripcion\": \"Implementar funcionalidades\",\n    \"progreso\": 50,\n    \"diasRestantes\": 5,\n    \"prioridad\": \"MEDIA\",\n    \"estado\": \"En proceso\"\n  },\n  {\n    \"id\": 2,\n    \"titulo\": \"Documentación\",\n    \"descripcion\": \"Completar documentación\",\n    \"progreso\": 100,\n    \"diasRestantes\": 1,\n    \"prioridad\": \"ALTA\",\n    \"estado\": \"Completada\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /actividades/{id}",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Verificar detalle de actividad por ID', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id', 1);",
+                  "    pm.expect(jsonData).to.have.property('prioridad');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{activityId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{activityId}}"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Single Activity",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/actividades/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"titulo\": \"Desarrollar aplicación Android\",\n  \"descripcion\": \"Implementar funcionalidades\",\n  \"progreso\": 50,\n  \"diasRestantes\": 5,\n  \"prioridad\": \"MEDIA\",\n  \"estado\": \"En proceso\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /actividades",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Verificar asignación de ID y cálculo de estado inicial', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('id');",
+                  "    pm.expect(jsonData.estado).to.eql('Pendiente');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Nueva actividad\",\n  \"descripcion\": \"Descripción de la actividad\",\n  \"progreso\": 0,\n  \"diasRestantes\": 10,\n  \"prioridad\": \"MEDIA\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actividades",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - Activity Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"titulo\": \"Nueva actividad\",\n  \"descripcion\": \"Descripción de la actividad\",\n  \"progreso\": 0,\n  \"diasRestantes\": 10,\n  \"prioridad\": \"MEDIA\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/actividades",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 3,\n  \"titulo\": \"Nueva actividad\",\n  \"descripcion\": \"Descripción de la actividad\",\n  \"progreso\": 0,\n  \"diasRestantes\": 10,\n  \"prioridad\": \"MEDIA\",\n  \"estado\": \"Pendiente\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "PATCH /actividades/{id}/progreso",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Progreso actualizado correctamente a 100 y estado Completada', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.progreso).to.eql(100);",
+                  "    pm.expect(jsonData.estado).to.eql('Completada');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progreso\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/actividades/{{activityId}}/progreso",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "{{activityId}}",
+                "progreso"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Progress Updated",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"progreso\": 100\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/actividades/1/progreso",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades",
+                    "1",
+                    "progreso"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"progreso\": 100,\n  \"estado\": \"Completada\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "GET /actividades?titulo=...",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('La busqueda devuelve coincidencia parcial por titulo', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData[0].titulo.toLowerCase()).to.include('proyecto');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actividades?titulo=proyecto",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades"
+              ],
+              "query": [
+                {
+                  "key": "titulo",
+                  "value": "proyecto"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Search Results",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/actividades?titulo=proyecto",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades"
+                  ],
+                  "query": [
+                    {
+                      "key": "titulo",
+                      "value": "proyecto"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 1,\n    \"titulo\": \"Proyecto de grado\",\n    \"descripcion\": \"Desarrollo del proyecto\",\n    \"progreso\": 50,\n    \"diasRestantes\": 5,\n    \"prioridad\": \"ALTA\",\n    \"estado\": \"En proceso\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "GET /actividades/urgentes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Validar regla de urgente: progreso < 100 y diasRestantes <= 3', function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "    pm.expect(jsonData[0].progreso).to.be.below(100);",
+                  "    pm.expect(jsonData[0].diasRestantes).to.be.at.most(3);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/actividades/urgentes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "actividades",
+                "urgentes"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK - Urgent Activities",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/actividades/urgentes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "actividades",
+                    "urgentes"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  {\n    \"id\": 4,\n    \"titulo\": \"Entrega de documentación\",\n    \"descripcion\": \"Finalizar documentación\",\n    \"progreso\": 60,\n    \"diasRestantes\": 2,\n    \"prioridad\": \"ALTA\",\n    \"estado\": \"En proceso\"\n  }\n]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
