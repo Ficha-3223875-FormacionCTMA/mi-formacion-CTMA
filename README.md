@@ -499,3 +499,34 @@ A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchi
 6. **Acción 6: Volver a presionar Atrás para salir / minimizar la app**
   * *Operación:* `navController.popBackStack()`
   * *Back Stack:* `[ ]`
+
+## 3.5 Laboratorio 3 y 3.6 Entregable integrado
+
+### Suite de Humo (Smoke Tests)
+| ID | Endpoint | Propósito | Resultado Esperado |
+| :--- | :--- | :--- | :--- |
+| **ST-01** | `POST /auth/login` | Probar inicio de sesión | Devuelve `200 OK` y el token JWT |
+| **ST-02** | `GET /todos` | Consultar la lista de tareas | Devuelve `200 OK` y la lista de tareas |
+| **ST-03** | `GET /todos/1` | Consultar una tarea válida | Devuelve `200 OK` con los datos del ID 1 |
+| **ST-04** | `POST /todos/add` | Enviar una nueva tarea | Devuelve `201 Created` o `200 OK` con el nuevo ID |
+
+### Charter de Sesión Exploratoria
+* **Misión:** Probar la estabilidad de la API enviando datos incorrectos o mal formateados.
+* **Alcance:** Endpoints de `/auth` y `/todos`.
+* **Tiempo (Time-box):** 45 minutos.
+* **Datos de prueba:** Contraseñas erróneas, IDs inexistentes (`9999`) y formatos incompatibles.
+* **Riesgos:** Asumir persistencia real tras peticiones de escritura y exposición de tokens JWT.
+
+### Matriz de Trazabilidad Actualizada
+| ID Caso | Descripción | Tipo | Método / Endpoint | Resultado Esperado | Ejecución | Resultado Real | Evidencia | Defecto |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **TC-01** | Autenticación válida | Positivo | `POST /auth/login` | Status `200 OK`, entrega token JWT | Éxito | Token recibido | Captura Postman | N/A |
+| **TC-02** | Autenticación fallida | Negativo | `POST /auth/login` | Status `400` / `401` | Éxito | Credenciales inválidas | Captura DevTools Network | N/A |
+| **TC-03** | Obtener actividades | Positivo | `GET /todos` | Status `200 OK`, lista de tareas | Éxito | Devuelve arreglo de tareas | Response JSON | N/A |
+| **TC-04** | Actividad inexistente | Negativo | `GET /todos/9999` | Status `404 Not Found` | Éxito | Tarea no encontrada | Status 404 Postman | N/A |
+| **TC-05** | Crear actividad | Positivo | `POST /todos/add` | Status `201`/`200`, ID asignado | Éxito | Objeto simulado devuelto | Response Body | N/A |
+| **TC-06** | Cambiar estado | Transición | `PUT /todos/1` | Status `200 OK`, `completed: true` | Éxito | Estado actualizado en respuesta | Payload & Response | N/A |
+
+### 3.6 Bitácora Técnica de Observación
+> **Aviso de Persistencia en Entorno DummyJSON:**  
+> Se deja constancia explícita en la bitácora de que **DummyJSON** opera únicamente como un entorno *mock / REST API* simulado[cite: 1]. Si bien procesa peticiones HTTP (`GET`, `POST`, `PUT`, `DELETE`) respondiendo con códigos de estado estandarizados[cite: 1], **sus operaciones de escritura no persisten modificaciones en la base de datos real del servidor**[cite: 1]. Cualquier recurso creado o editado devuelve una respuesta simulada en el acto, por lo que consultas subsecuentes a dicho recurso reflejarán únicamente los datos por defecto del servidor[cite: 1].
