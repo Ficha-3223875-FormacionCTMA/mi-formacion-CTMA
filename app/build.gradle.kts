@@ -2,16 +2,20 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android.setup)
     alias(libs.plugins.kotlin.compose.setup)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.miformacionctma"
-    compileSdk = 36 // CORREGIDO: Sintaxis simplificada estándar
+
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.miformacionctma"
+
         minSdk = 24
         targetSdk = 36
+
         versionCode = 1
         versionName = "1.0"
 
@@ -20,17 +24,20 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // CORREGIDO: Propiedad estándar para habilitar/deshabilitar minificación
+            isMinifyEnabled = false
+
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
     }
@@ -38,30 +45,49 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(
+            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+        )
     }
 }
 
 dependencies {
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
-    implementation("androidx.navigation:navigation-compose:2.8.0")
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    // Navigation
+    implementation(libs.androidx.navigation.compose)
 
-    // Pruebas
+    // Room 3
+    implementation(libs.androidx.room3.runtime)
+    ksp(libs.androidx.room3.compiler)
+
+    // SQLite
+    implementation(libs.androidx.sqlite)
+    implementation(libs.androidx.sqlite.ktx)
+    implementation(libs.androidx.sqlite.framework)
+
+    // Pruebas unitarias
     testImplementation(libs.junit)
-    testImplementation(kotlin("test")) // CORREGIDO: Debe ir como testImplementation
+    testImplementation(kotlin("test"))
 
+    // Pruebas Android
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
 
+    // Debug
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
