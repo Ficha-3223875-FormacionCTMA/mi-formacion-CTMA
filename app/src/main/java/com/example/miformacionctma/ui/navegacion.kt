@@ -29,7 +29,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.miformacionctma.domain.ActividadFormativa
-
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.miformacionctma.ui.actividad.ActividadViewModel
 private const val ARG_ID = "id"
 
 /**
@@ -51,9 +53,11 @@ sealed class Pantalla(val ruta: String) {
  */
 @Composable
 fun GrafoNavegacion(
-    actividades: List<ActividadFormativa>,
+    viewModel: ActividadViewModel,
     navController: NavHostController = rememberNavController()
 ) {
+    val actividades by viewModel.actividades.collectAsState()
+
     NavHost(
         navController = navController,
         startDestination = Pantalla.Lista.ruta
@@ -61,26 +65,48 @@ fun GrafoNavegacion(
         composable(Pantalla.Lista.ruta) {
             ListaRoute(
                 actividades = actividades,
-                onActividadClick = { id -> navController.navigate(Pantalla.Detalle.crearRuta(id)) },
-                onCrearClick = { navController.navigate(Pantalla.Crear.ruta) }
+                onActividadClick = { id ->
+                    navController.navigate(
+                        Pantalla.Detalle.crearRuta(id)
+                    )
+                },
+                onCrearClick = {
+                    navController.navigate(Pantalla.Crear.ruta)
+                }
             )
         }
 
         composable(Pantalla.Crear.ruta) {
             CrearRoute(
-                onGuardar = { navController.popBackStack() },
-                onCancelar = { navController.popBackStack() }
+                onGuardar = {
+                    navController.popBackStack()
+                },
+                onCancelar = {
+                    navController.popBackStack()
+                }
             )
         }
 
         composable(
             route = Pantalla.Detalle.ruta,
-            arguments = listOf(navArgument(ARG_ID) { type = NavType.LongType })
+            arguments = listOf(
+                navArgument(ARG_ID) {
+                    type = NavType.LongType
+                }
+            )
         ) { backStackEntry ->
-            val id = backStackEntry.arguments?.getLong(ARG_ID) ?: -1L
+
+            val id =
+                backStackEntry.arguments?.getLong(ARG_ID)
+                    ?: -1L
+
             DetalleRoute(
-                actividad = actividades.find { it.id == id },
-                onVolver = { navController.popBackStack() }
+                actividad = actividades.find {
+                    it.id == id
+                },
+                onVolver = {
+                    navController.popBackStack()
+                }
             )
         }
     }
