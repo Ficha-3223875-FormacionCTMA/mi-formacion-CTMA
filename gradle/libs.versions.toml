@@ -19,6 +19,7 @@ ksp = "2.1.0-1.0.29"
 
 # Navigation
 navigationCompose = "2.8.0"
+datastore = "1.1.1"
 
 [libraries]
 
@@ -66,8 +67,7 @@ androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "s
 androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sqlite" }
 
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
-
-
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 
