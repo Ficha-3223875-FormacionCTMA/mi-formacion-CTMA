@@ -1,0 +1,8 @@
+- `[x]` Actualizar modelos de dominio y entidad con el campo `resuelto`
+- `[x]` Actualizar el mapeador `ActividadMapper.kt`
+- `[x]` Configurar la migración de versión 1 a versión 2 en `AppDatabase` y `DatabaseProvider`
+- `[x]` Añadir la función de búsqueda en el `ActividadRepository`
+- `[x]` Rediseñar `ActividadViewModel` para soportar búsqueda y filtros reactivos en tiempo real
+- `[x]` Integrar los controles de búsqueda, filtros y campos de `resuelto` en `ui/navegacion.kt`
+- `[x]` Crear la prueba instrumentada `BaseDatosTest.kt` para certificar la migración y el DAO
+- `[x]` Ejecutar las comprobaciones y actualizar la documentación en `README.md`

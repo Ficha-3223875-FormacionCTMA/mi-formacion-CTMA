@@ -530,3 +530,45 @@ A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchi
 ### 3.6 Bitácora Técnica de Observación
 > **Aviso de Persistencia en Entorno DummyJSON:**  
 > Se deja constancia explícita en la bitácora de que **DummyJSON** opera únicamente como un entorno *mock / REST API* simulado[cite: 1]. Si bien procesa peticiones HTTP (`GET`, `POST`, `PUT`, `DELETE`) respondiendo con códigos de estado estandarizados[cite: 1], **sus operaciones de escritura no persisten modificaciones en la base de datos real del servidor**[cite: 1]. Cualquier recurso creado o editado devuelve una respuesta simulada en el acto, por lo que consultas subsecuentes a dicho recurso reflejarán únicamente los datos por defecto del servidor[cite: 1].
+
+---
+
+# Semana 6 — Migración de Base de Datos y UI Reactiva (Room v2)
+
+En esta etapa se completó la integración total de la capa de datos con la interfaz de usuario, se implementó la primera migración de esquema y se añadieron capacidades de búsqueda avanzada.
+
+## 🏗️ 1. Migración de Room (Versión 1 ➔ 2)
+
+Se actualizó la estructura de la base de datos local para incluir el campo `resuelto`, permitiendo marcar actividades como finalizadas independientemente de su progreso.
+
+*   **Campo añadido:** `resuelto` (Boolean / INTEGER en SQLite).
+*   **Valor inicial:** `false` (0) para todos los registros existentes.
+*   **Script de Migración:** 
+    ```sql
+    ALTER TABLE actividades ADD COLUMN resuelto INTEGER NOT NULL DEFAULT 0
+    ```
+*   **Persistencia:** Se verificó que tras la migración, las actividades creadas en la versión 1 conservan todos sus datos intactos.
+
+## 🔍 2. Búsqueda y Filtrado Reactivo
+
+La interfaz de usuario ahora ofrece una experiencia de filtrado en tiempo real sin necesidad de recargas manuales:
+
+*   **Búsqueda Global:** Un campo de texto en la lista permite buscar coincidencias parciales por **título** o **descripción** directamente desde SQLite.
+*   **Filtro de Urgencia:** Un interruptor (`Switch`) permite visualizar instantáneamente solo aquellas tareas con menos de 3 días restantes y progreso incompleto.
+*   **Tecnología:** Se utiliza el operador `flatMapLatest` y `combine` de Kotlin Flows para reaccionar a los cambios de estado del ViewModel.
+
+## 🧪 3. Plan de Pruebas Instrumentadas (DAO y Estructura)
+
+Se implementó una suite de pruebas instrumentadas en `BaseDatosTest.kt` para garantizar la integridad de los datos:
+
+| Prueba | Propósito | Resultado |
+| :--- | :--- | :--- |
+| `testDaoOperaciones` | Valida inserción, recuperación por ID y el nuevo campo `resuelto`. | **EXITOSO** |
+| `Búsqueda DAO` | Confirma que la consulta SQL de búsqueda devuelve resultados precisos. | **EXITOSO** |
+
+## ✅ 4. Verificación de Persistencia
+
+Se realizaron pruebas de ciclo de vida completo:
+1.  **Registro de actividad** con éxito.
+2.  **Cierre forzado** de la aplicación.
+3.  **Reapertura:** Los datos persisten correctamente en la base de datos física del dispositivo/emulador.
