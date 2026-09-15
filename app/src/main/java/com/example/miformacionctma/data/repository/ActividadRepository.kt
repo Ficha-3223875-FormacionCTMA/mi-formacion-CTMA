@@ -23,6 +23,13 @@ class ActividadRepository(
             .map { it?.toDomain() }
     }
 
+    fun buscarPorTexto(query: String): Flow<List<ActividadFormativa>> {
+        return actividadDao.buscarPorTexto(query)
+            .map { actividades ->
+                actividades.map { it.toDomain() }
+            }
+    }
+
     suspend fun insertar(actividad: ActividadFormativa): Long {
         return actividadDao.insertar(actividad.toEntity())
     }

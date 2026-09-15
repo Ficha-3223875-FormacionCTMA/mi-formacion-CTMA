@@ -19,6 +19,7 @@ object DatabaseProvider {
                 "mi_formacion_ctma.db"
             )
                 .setDriver(AndroidSQLiteDriver())
+                .addMigrations(AppDatabase.MIGRATION_1_2)
                 .build()
                 .also {
                     INSTANCE = it

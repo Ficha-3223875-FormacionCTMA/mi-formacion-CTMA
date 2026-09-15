@@ -16,6 +16,9 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -151,7 +154,7 @@ fun GrafoNavegacion(
 }
 
 /**
- * Destino: Lista.
+ * Destino: Lista con soporte de búsqueda y filtros reactivos.
  */
 @Composable
 fun ListaRoute(
@@ -162,6 +165,17 @@ fun ListaRoute(
     onCrearClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val textoBusqueda by viewModel.textoBusqueda.collectAsState()
+    val soloUrgentes by viewModel.soloUrgentes.collectAsState()
+
+    val coloresCampos = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = Color.Black,
+        unfocusedTextColor = Color.Black,
+        focusedContainerColor = Color.White,
+        unfocusedContainerColor = Color.White,
+        cursorColor = Color.Black
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -171,6 +185,32 @@ fun ListaRoute(
             text = "Mis actividades",
             style = MaterialTheme.typography.titleLarge
         )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Barra de Búsqueda reactiva en tiempo real (DAO query)
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = { viewModel.actualizarBusqueda(it) },
+            label = { Text("Buscar por título o descripción...") },
+            colors = coloresCampos,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Filtro de Urgencia reactivo
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(text = "Mostrar solo urgentes (<= 3 días)", style = MaterialTheme.typography.bodyMedium)
+            Switch(
+                checked = soloUrgentes,
+                onCheckedChange = { viewModel.cambiarFiltroUrgentes(it) }
+            )
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -223,7 +263,7 @@ fun ListaRoute(
 }
 
 /**
- * Destino: Crear.
+ * Destino: Crear con campo de resuelto incorporado.
  */
 @Composable
 fun CrearRoute(
@@ -236,6 +276,7 @@ fun CrearRoute(
     var descripcion by remember { mutableStateOf("") }
     var progresoTexto by remember { mutableStateOf("0") }
     var diasTexto by remember { mutableStateOf("0") }
+    var resuelto by remember { mutableStateOf(false) }
 
     val coloresCampos = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
@@ -290,6 +331,17 @@ fun CrearRoute(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = resuelto,
+                onCheckedChange = { resuelto = it }
+            )
+            Text(text = "Actividad resuelta / finalizada", style = MaterialTheme.typography.bodyMedium)
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
@@ -306,7 +358,8 @@ fun CrearRoute(
                         titulo = titulo.trim(),
                         descripcion = descripcion.trim().ifBlank { null },
                         progreso = progreso,
-                        diasRestantes = diasRestantes
+                        diasRestantes = diasRestantes,
+                        resuelto = resuelto
                     )
                     viewModel.insertar(nuevaActividad)
                     onGuardar()
@@ -327,7 +380,7 @@ fun CrearRoute(
 }
 
 /**
- * Destino: Editar (Nueva vista robusta de Formulario Completo).
+ * Destino: Editar con campo de resuelto incorporado.
  */
 @Composable
 fun EditarRoute(
@@ -354,6 +407,7 @@ fun EditarRoute(
     var descripcion by remember(actividad.id) { mutableStateOf(actividad.descripcion.orEmpty()) }
     var progresoTexto by remember(actividad.id) { mutableStateOf(actividad.progreso.toString()) }
     var diasTexto by remember(actividad.id) { mutableStateOf(actividad.diasRestantes.toString()) }
+    var resuelto by remember(actividad.id) { mutableStateOf(actividad.resuelto) }
 
     val coloresCampos = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
@@ -408,6 +462,17 @@ fun EditarRoute(
             modifier = Modifier.fillMaxWidth()
         )
 
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = resuelto,
+                onCheckedChange = { resuelto = it }
+            )
+            Text(text = "Actividad resuelta / finalizada", style = MaterialTheme.typography.bodyMedium)
+        }
+
         Spacer(modifier = Modifier.height(8.dp))
 
         Row(
@@ -425,7 +490,8 @@ fun EditarRoute(
                             titulo = titulo.trim(),
                             descripcion = descripcion.trim().ifBlank { null },
                             progreso = progreso,
-                            diasRestantes = diasRestantes
+                            diasRestantes = diasRestantes,
+                            resuelto = resuelto
                         )
                     )
                     onGuardar()
