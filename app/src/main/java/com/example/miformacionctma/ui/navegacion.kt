@@ -1,6 +1,7 @@
 package com.example.miformacionctma.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +35,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,6 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.miformacionctma.domain.ActividadFormativa
+import com.example.miformacionctma.ui.actividad.ListadoUiState
 import com.example.miformacionctma.ui.actividad.ActividadViewModel
 
 private const val ARG_ID = "id"
@@ -70,7 +74,7 @@ fun GrafoNavegacion(
     viewModel: ActividadViewModel,
     navController: NavHostController = rememberNavController()
 ) {
-    val actividades by viewModel.actividades.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -82,7 +86,7 @@ fun GrafoNavegacion(
         // ---------------------------------------------------------
         composable(Pantalla.Lista.ruta) {
             ListaRoute(
-                actividades = actividades,
+                uiState = uiState,
                 viewModel = viewModel,
                 onActividadClick = { id ->
                     navController.navigate(Pantalla.Detalle.crearRuta(id))
@@ -123,8 +127,11 @@ fun GrafoNavegacion(
             )
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getLong(ARG_ID) ?: -1L
+            
+            val actividad = (uiState as? ListadoUiState.Contenido)?.actividades?.find { it.id == id }
+            
             DetalleRoute(
-                actividad = actividades.find { it.id == id },
+                actividad = actividad,
                 onVolver = { navController.popBackStack() }
             )
         }
@@ -141,7 +148,7 @@ fun GrafoNavegacion(
             )
         ) { backStackEntry ->
             val id = backStackEntry.arguments?.getLong(ARG_ID) ?: -1L
-            val actividad = actividades.find { it.id == id }
+            val actividad = (uiState as? ListadoUiState.Contenido)?.actividades?.find { it.id == id }
             
             EditarRoute(
                 actividad = actividad,
@@ -158,15 +165,15 @@ fun GrafoNavegacion(
  */
 @Composable
 fun ListaRoute(
-    actividades: List<ActividadFormativa>,
+    uiState: ListadoUiState,
     viewModel: ActividadViewModel,
     onActividadClick: (Long) -> Unit,
     onEditarClick: (Long) -> Unit,
     onCrearClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val textoBusqueda by viewModel.textoBusqueda.collectAsState()
-    val soloUrgentes by viewModel.soloUrgentes.collectAsState()
+    val textoBusqueda by viewModel.textoBusqueda.collectAsStateWithLifecycle()
+    val soloUrgentes by viewModel.soloUrgentes.collectAsStateWithLifecycle()
 
     val coloresCampos = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
@@ -223,39 +230,58 @@ fun ListaRoute(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(
-                items = actividades,
-                key = { it.id }
-            ) { actividad ->
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    TarjetaActividad(
-                        actividad = actividad,
-                        onClick = { onActividadClick(actividad.id) }
-                    )
+        when (uiState) {
+            ListadoUiState.Cargando -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+            is ListadoUiState.Contenido -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = uiState.actividades,
+                        key = { it.id }
+                    ) { actividad ->
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            TarjetaActividad(
+                                actividad = actividad,
+                                onClick = { onActividadClick(actividad.id) }
+                            )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = { onEditarClick(actividad.id) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Editar")
-                        }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                OutlinedButton(
+                                    onClick = { onEditarClick(actividad.id) },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Editar")
+                                }
 
-                        Button(
-                            onClick = { viewModel.eliminar(actividad) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Eliminar")
+                                Button(
+                                    onClick = { viewModel.eliminar(actividad) },
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text("Eliminar")
+                                }
+                            }
                         }
                     }
+                }
+            }
+            ListadoUiState.Vacio -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay actividades que coincidan con los filtros.")
+                }
+            }
+            is ListadoUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: ${uiState.mensaje}", color = MaterialTheme.colorScheme.error)
                 }
             }
         }
