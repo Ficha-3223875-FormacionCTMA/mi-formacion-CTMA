@@ -1,10 +1,13 @@
 package com.example.miformacionctma.ui.actividad
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -12,12 +15,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,43 +29,17 @@ import com.example.miformacionctma.domain.Prioridad
 fun ActividadScreen(
     viewModel: ActividadViewModel
 ) {
-    val actividades by viewModel.actividades.collectAsStateWithLifecycle()
-
-    var textoBusqueda by rememberSaveable {
-        androidx.compose.runtime.mutableStateOf("")
-    }
-
-    val actividadesFiltradas = actividades.filter { actividad ->
-        textoBusqueda.isBlank() ||
-                actividad.titulo.contains(textoBusqueda, ignoreCase = true) ||
-                (!actividad.descripcion.isNullOrBlank() &&
-                        actividad.descripcion.contains(textoBusqueda, ignoreCase = true))
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
     ) {
-
+        // Encabezado simplificado
         Text(
-            text = "Actividades: ${actividadesFiltradas.size}",
+            text = "Mis Actividades",
             style = MaterialTheme.typography.headlineSmall
-        )
-
-        OutlinedTextField(
-            value = textoBusqueda,
-            onValueChange = { textoBusqueda = it },
-            label = {
-                Text("Buscar actividad")
-            },
-            placeholder = {
-                Text("Escribe un título o descripción")
-            },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp)
         )
 
         Button(
@@ -87,77 +61,49 @@ fun ActividadScreen(
             Text("Agregar actividad")
         }
 
-        when {
-            actividades.isEmpty() -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 32.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    CircularProgressIndicator()
+        Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = "Cargando actividades...",
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+        when (uiState) {
+            ListadoUiState.Cargando -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
-
-            actividadesFiltradas.isEmpty() -> {
-                Text(
-                    text = "No se encontraron actividades",
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(top = 24.dp)
-                )
-            }
-
-            else -> {
+            is ListadoUiState.Contenido -> {
                 LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 16.dp),
+                    modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(
-                        items = actividadesFiltradas,
+                        items = (uiState as ListadoUiState.Contenido).actividades,
                         key = { actividad -> actividad.id }
                     ) { actividad ->
-
-                        Card(
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
+                        Card(modifier = Modifier.fillMaxWidth()) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Text(
-                                    text = actividad.titulo,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-
-                                Text(
-                                    text = "Progreso: ${actividad.progreso}%"
-                                )
-
-                                Text(
-                                    text = "Días restantes: ${actividad.diasRestantes}"
-                                )
-
-                                Text(
-                                    text = "Prioridad: ${actividad.prioridad}"
-                                )
-
+                                Text(text = actividad.titulo, style = MaterialTheme.typography.titleMedium)
+                                Text(text = "Progreso: ${actividad.progreso}%")
+                                Text(text = "Días restantes: ${actividad.diasRestantes}")
+                                Text(text = "Prioridad: ${actividad.prioridad}")
                                 if (!actividad.descripcion.isNullOrBlank()) {
-                                    Text(
-                                        text = actividad.descripcion
-                                    )
+                                    Text(text = actividad.descripcion)
                                 }
                             }
                         }
                     }
+                }
+            }
+            ListadoUiState.Vacio -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("No hay actividades.")
+                }
+            }
+            is ListadoUiState.Error -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Error: ${(uiState as ListadoUiState.Error).mensaje}")
                 }
             }
         }

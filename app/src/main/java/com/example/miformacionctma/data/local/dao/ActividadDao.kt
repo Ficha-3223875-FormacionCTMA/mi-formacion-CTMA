@@ -9,7 +9,6 @@ import androidx.room3.Update
 import com.example.miformacionctma.data.local.entity.ActividadFormativa
 import kotlinx.coroutines.flow.Flow
 
-//CRUD PARA LAS ACTIVIDADES
 @Dao
 interface ActividadDao {
 
@@ -18,6 +17,9 @@ interface ActividadDao {
 
     @Query("SELECT * FROM actividades WHERE id = :id")
     fun obtenerPorId(id: Long): Flow<ActividadFormativa?>
+
+    @Query("SELECT * FROM actividades WHERE titulo LIKE '%' || :query || '%' OR descripcion LIKE '%' || :query || '%' ORDER BY id DESC")
+    fun buscarPorTexto(query: String): Flow<List<ActividadFormativa>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(actividad: ActividadFormativa): Long
