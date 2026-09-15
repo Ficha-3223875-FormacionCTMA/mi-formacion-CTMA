@@ -10,13 +10,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
 
@@ -24,7 +29,18 @@ import com.example.miformacionctma.domain.Prioridad
 fun ActividadScreen(
     viewModel: ActividadViewModel
 ) {
-    val actividades by viewModel.actividades.collectAsState()
+    val actividades by viewModel.actividades.collectAsStateWithLifecycle()
+
+    var textoBusqueda by rememberSaveable {
+        androidx.compose.runtime.mutableStateOf("")
+    }
+
+    val actividadesFiltradas = actividades.filter { actividad ->
+        textoBusqueda.isBlank() ||
+                actividad.titulo.contains(textoBusqueda, ignoreCase = true) ||
+                (!actividad.descripcion.isNullOrBlank() &&
+                        actividad.descripcion.contains(textoBusqueda, ignoreCase = true))
+    }
 
     Column(
         modifier = Modifier
@@ -33,8 +49,23 @@ fun ActividadScreen(
     ) {
 
         Text(
-            text = "Actividades: ${actividades.size}",
+            text = "Actividades: ${actividadesFiltradas.size}",
             style = MaterialTheme.typography.headlineSmall
+        )
+
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = { textoBusqueda = it },
+            label = {
+                Text("Buscar actividad")
+            },
+            placeholder = {
+                Text("Escribe un título o descripción")
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
         )
 
         Button(
@@ -56,47 +87,75 @@ fun ActividadScreen(
             Text("Agregar actividad")
         }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 16.dp),
-            contentPadding = PaddingValues(bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(
-                items = actividades,
-                key = { actividad -> actividad.id }
-            ) { actividad ->
-
-                Card(
-                    modifier = Modifier.fillMaxWidth()
+        when {
+            actividades.isEmpty() -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
+                    CircularProgressIndicator()
 
-                        Text(
-                            text = actividad.titulo,
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                    Text(
+                        text = "Cargando actividades...",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
 
-                        Text(
-                            text = "Progreso: ${actividad.progreso}%"
-                        )
+            actividadesFiltradas.isEmpty() -> {
+                Text(
+                    text = "No se encontraron actividades",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(top = 24.dp)
+                )
+            }
 
-                        Text(
-                            text = "Días restantes: ${actividad.diasRestantes}"
-                        )
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(top = 16.dp),
+                    contentPadding = PaddingValues(bottom = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = actividadesFiltradas,
+                        key = { actividad -> actividad.id }
+                    ) { actividad ->
 
-                        Text(
-                            text = "Prioridad: ${actividad.prioridad}"
-                        )
+                        Card(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = actividad.titulo,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
 
-                        if (!actividad.descripcion.isNullOrBlank()) {
-                            Text(
-                                text = actividad.descripcion
-                            )
+                                Text(
+                                    text = "Progreso: ${actividad.progreso}%"
+                                )
+
+                                Text(
+                                    text = "Días restantes: ${actividad.diasRestantes}"
+                                )
+
+                                Text(
+                                    text = "Prioridad: ${actividad.prioridad}"
+                                )
+
+                                if (!actividad.descripcion.isNullOrBlank()) {
+                                    Text(
+                                        text = actividad.descripcion
+                                    )
+                                }
+                            }
                         }
                     }
                 }

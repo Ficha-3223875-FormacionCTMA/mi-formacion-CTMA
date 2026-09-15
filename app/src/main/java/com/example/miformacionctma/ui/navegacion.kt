@@ -13,8 +13,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -22,6 +27,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -29,34 +35,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.miformacionctma.domain.ActividadFormativa
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.example.miformacionctma.ui.actividad.ActividadViewModel
+
 private const val ARG_ID = "id"
 
-/**
- * Identificadores de las pantallas/rutas de la aplicación.
- */
 sealed class Pantalla(val ruta: String) {
-    object Inicio : Pantalla(ruta = "inicio")
-    object Lista : Pantalla(ruta = "lista")
-    object Crear : Pantalla(ruta = "crear")
-    object Detalle : Pantalla(ruta = "detalle/{$ARG_ID}") {
+    object Inicio : Pantalla("inicio")
+    object Lista : Pantalla("lista")
+    object Crear : Pantalla("crear")
+    object Detalle : Pantalla("detalle/{$ARG_ID}") {
         fun crearRuta(id: Long): String = "detalle/$id"
     }
 }
 
-/**
- * Grafo principal de navegación.
- * Recibe la lista de actividades (por ahora en memoria) y arma
- * los tres destinos: Lista, Crear y Detalle.
- */
 @Composable
 fun GrafoNavegacion(
     viewModel: ActividadViewModel,
     navController: NavHostController = rememberNavController()
 ) {
-    val actividades by viewModel.actividades.collectAsState()
+    val actividades by viewModel.actividades.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -96,14 +93,10 @@ fun GrafoNavegacion(
             )
         ) { backStackEntry ->
 
-            val id =
-                backStackEntry.arguments?.getLong(ARG_ID)
-                    ?: -1L
+            val id = backStackEntry.arguments?.getLong(ARG_ID) ?: -1L
 
             DetalleRoute(
-                actividad = actividades.find {
-                    it.id == id
-                },
+                actividad = actividades.find { it.id == id },
                 onVolver = {
                     navController.popBackStack()
                 }
@@ -112,10 +105,6 @@ fun GrafoNavegacion(
     }
 }
 
-/**
- * Destino: Lista. Reutiliza TarjetaActividad (Semana 3) y su
- * callback onClick para navegar al detalle usando el id.
- */
 @Composable
 fun ListaRoute(
     actividades: List<ActividadFormativa>,
@@ -123,36 +112,101 @@ fun ListaRoute(
     onCrearClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var textoBusqueda by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val actividadesFiltradas = actividades.filter { actividad ->
+        textoBusqueda.isBlank() ||
+                actividad.titulo.contains(textoBusqueda, ignoreCase = true) ||
+                (!actividad.descripcion.isNullOrBlank() &&
+                        actividad.descripcion.contains(
+                            textoBusqueda,
+                            ignoreCase = true
+                        ))
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(text = "Mis actividades", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = "Mis actividades",
+            style = MaterialTheme.typography.titleLarge
+        )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Button(onClick = onCrearClick, modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = textoBusqueda,
+            onValueChange = {
+                textoBusqueda = it
+            },
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text("Buscar actividad")
+            },
+            placeholder = {
+                Text("Título o descripción")
+            },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Button(
+            onClick = onCrearClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Nueva actividad")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(items = actividades, key = { it.id }) { actividad ->
-                TarjetaActividad(
-                    actividad = actividad,
-                    onClick = { onActividadClick(actividad.id) }
+        when {
+            actividades.isEmpty() -> {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "No hay actividades registradas",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+
+            actividadesFiltradas.isEmpty() -> {
+                Text(
+                    text = "No se encontraron actividades",
+                    style = MaterialTheme.typography.bodyLarge
                 )
+            }
+
+            else -> {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(
+                        items = actividadesFiltradas,
+                        key = { it.id }
+                    ) { actividad ->
+
+                        TarjetaActividad(
+                            actividad = actividad,
+                            onClick = {
+                                onActividadClick(actividad.id)
+                            }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
-/**
- * Destino: Crear. Placeholder del formulario de creación
- * (se conectará con ValidacionFormulario en la próxima entrega).
- */
 @Composable
 fun CrearRoute(
     onGuardar: () -> Unit,
@@ -165,27 +219,35 @@ fun CrearRoute(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(text = "Crear actividad", style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = "Crear actividad",
+            style = MaterialTheme.typography.titleLarge
+        )
 
         Text(
             text = "Formulario de creación de actividad.",
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onGuardar) { Text("Guardar") }
-            OutlinedButton(onClick = onCancelar) { Text("Cancelar") }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Button(onClick = onGuardar) {
+                Text("Guardar")
+            }
+
+            OutlinedButton(onClick = onCancelar) {
+                Text("Cancelar")
+            }
         }
     }
 }
 
-/**
- * Destino: Detalle. Recibe la actividad ya resuelta a partir del
- * argumento id. Si no existe, muestra un estado NoEncontrada
- * accesible en lugar de fallar.
- */
 sealed class EstadoDetalle {
-    data class Encontrada(val actividad: ActividadFormativa) : EstadoDetalle()
+    data class Encontrada(
+        val actividad: ActividadFormativa
+    ) : EstadoDetalle()
+
     object NoEncontrada : EstadoDetalle()
 }
 
@@ -202,16 +264,20 @@ fun DetalleRoute(
     }
 
     when (estado) {
-        is EstadoDetalle.Encontrada -> DetalleContenido(
-            actividad = estado.actividad,
-            onVolver = onVolver,
-            modifier = modifier
-        )
+        is EstadoDetalle.Encontrada -> {
+            DetalleContenido(
+                actividad = estado.actividad,
+                onVolver = onVolver,
+                modifier = modifier
+            )
+        }
 
-        EstadoDetalle.NoEncontrada -> DetalleNoEncontrada(
-            onVolver = onVolver,
-            modifier = modifier
-        )
+        EstadoDetalle.NoEncontrada -> {
+            DetalleNoEncontrada(
+                onVolver = onVolver,
+                modifier = modifier
+            )
+        }
     }
 }
 
@@ -227,23 +293,30 @@ private fun DetalleContenido(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(text = actividad.titulo, style = MaterialTheme.typography.titleLarge)
+        Text(
+            text = actividad.titulo,
+            style = MaterialTheme.typography.titleLarge
+        )
 
         actividad.descripcion?.let {
-            Text(text = it, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
-        Text(text = "Progreso: ${actividad.progreso}%")
+        Text(
+            text = "Progreso: ${actividad.progreso}%"
+        )
 
-        Button(onClick = onVolver) { Text("Volver") }
+        Button(
+            onClick = onVolver
+        ) {
+            Text("Volver")
+        }
     }
 }
 
-/**
- * Estado de recuperación accesible: usa liveRegion para que
- * TalkBack anuncie el mensaje automáticamente al aparecer,
- * en vez de dejar la pantalla en blanco o crashear.
- */
 @Composable
 private fun DetalleNoEncontrada(
     onVolver: () -> Unit,
@@ -255,8 +328,8 @@ private fun DetalleNoEncontrada(
             .padding(24.dp)
             .semantics(mergeDescendants = true) {
                 liveRegion = LiveRegionMode.Polite
-                contentDescription = "Actividad no encontrada. Es posible que el enlace sea " +
-                        "incorrecto o que la actividad ya no exista."
+                contentDescription =
+                    "Actividad no encontrada. Es posible que el enlace sea incorrecto o que la actividad ya no exista."
             },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
