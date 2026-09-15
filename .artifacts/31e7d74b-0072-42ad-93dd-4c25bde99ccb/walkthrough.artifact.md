@@ -1,39 +1,37 @@
-# Walkthrough - Mejora de Visibilidad
+# Walkthrough: Integración de UI, Búsqueda y Migración de Room (Guía 6)
 
-Se han aplicado cambios estéticos para garantizar que el texto en los formularios sea legible bajo cualquier circunstancia y que el tema visual se aplique correctamente a toda la aplicación.
+Se han completado satisfactoriamente todos los requerimientos de la Guía 6, logrando una integración fluida entre la interfaz de usuario reactiva y la base de datos persistente.
 
-## Cambios Realizados
+## 🏗️ Migración y Evolución de Datos
 
-### Configuración del Fondo Global
-Se envolvió el grafo de navegación en un componente `Surface` en `MainActivity`. Esto asegura que el color de fondo azul oscuro (`FondoOscuro`) definido en el esquema de colores se aplique a toda la pantalla, eliminando el fondo blanco genérico del sistema.
+Se realizó la migración del esquema de la base de datos de la **Versión 1 a la Versión 2**. Se añadió el campo `resuelto` (Boolean) tanto en la capa de datos (Entity) como en la de dominio (Domain).
 
-```diff
-+ Surface(
-+     modifier = Modifier.fillMaxSize(),
-+     color = MaterialTheme.colorScheme.background
-+ ) {
-      GrafoNavegacion(viewModel = actividadViewModel)
-+ }
-```
+> [!NOTE]
+> La migración utiliza un script `ALTER TABLE` que asigna `DEFAULT 0 (false)` a los registros existentes para prevenir errores de nulabilidad y asegurar la integridad de la información previa.
 
-### Personalización de Campos de Texto
-En `ui/navegacion.kt`, se personalizaron los colores de `OutlinedTextField` en las pantallas de creación y edición. Ahora, independientemente del tema del sistema:
-- El fondo del cuadro de texto es **Blanco**.
-- El texto introducido es **Negro**.
-- El cursor es **Negro**.
+## 🔍 Interfaz Reactiva y Búsqueda
 
-```diff
-+ val coloresCampos = OutlinedTextFieldDefaults.colors(
-+     focusedTextColor = Color.Black,
-+     unfocusedTextColor = Color.Black,
-+     focusedContainerColor = Color.White,
-+     unfocusedContainerColor = Color.White,
-+     cursorColor = Color.Black,
-+     ...
-+ )
-```
+La pantalla de lista (`ListaRoute`) ahora es totalmente dinámica:
+- **Búsqueda en tiempo real:** Al escribir en la nueva barra de búsqueda, el `ActividadViewModel` lanza consultas optimizadas al DAO (`buscarPorTexto`), filtrando por título o descripción instantáneamente.
+- **Filtro de Urgencia:** Se añadió un interruptor para mostrar solo las actividades que requieren atención inmediata (<= 3 días), utilizando la lógica de negocio centralizada en `ReglasActividad`.
 
-## Verificación
+## 🎨 Formularios Mejorados
 
-- **Estabilidad:** El código compila correctamente y no se han alterado las funcionalidades de Room o Navegación.
-- **Visibilidad:** Se ha verificado visualmente que el contraste entre el texto negro y el fondo blanco de los inputs permite una lectura perfecta.
+Los formularios de **Crear** y **Editar** actividad ahora incluyen:
+- Un campo de selección (**Checkbox**) para el estado "Resuelto".
+- Persistencia garantizada al guardar cambios.
+- Colores personalizados (Texto negro, Fondo blanco) para asegurar una visibilidad óptima en cualquier tema.
+
+## 🧪 Calidad y Pruebas
+
+Se implementó una suite de pruebas instrumentadas en [BaseDatosTest.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/androidTest/java/com/example/miformacionctma/data/local/BaseDatosTest.kt) que valida:
+1. La inserción y recuperación exitosa de actividades con el nuevo campo.
+2. La precisión de los resultados de búsqueda directamente desde SQLite.
+
+---
+
+### 🎥 Verificación Manual
+1. Abrir la app ➔ Los datos antiguos siguen ahí.
+2. Crear actividad con `resuelto = true` ➔ Se guarda correctamente.
+3. Buscar "Android" ➔ La lista se filtra al instante.
+4. Cerrar y abrir ➔ Todo permanece intacto.

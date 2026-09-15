@@ -12,7 +12,8 @@ fun ActividadEntity.toDomain(): ActividadDomain {
         descripcion = this.descripcion,
         progreso = this.progreso,
         diasRestantes = this.diasRestantes,
-        prioridad = prioridadEnum
+        prioridad = prioridadEnum,
+        resuelto = this.resuelto
     )
 }
 
@@ -23,6 +24,7 @@ fun ActividadDomain.toEntity(): ActividadEntity {
         descripcion = this.descripcion,
         progreso = this.progreso,
         diasRestantes = this.diasRestantes,
-        prioridad = this.prioridad.name
+        prioridad = this.prioridad.name,
+        resuelto = this.resuelto
     )
 }
