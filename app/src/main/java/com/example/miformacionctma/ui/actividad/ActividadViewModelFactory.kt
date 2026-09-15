@@ -3,9 +3,11 @@ package com.example.miformacionctma.ui.actividad
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.miformacionctma.data.repository.ActividadRepository
+import com.example.miformacionctma.data.repository.PreferenciasRepository
 
 class ActividadViewModelFactory(
-    private val repository: ActividadRepository
+    private val repository: ActividadRepository,
+    private val preferencias: PreferenciasRepository
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -13,7 +15,7 @@ class ActividadViewModelFactory(
         modelClass: Class<T>
     ): T {
         if (modelClass.isAssignableFrom(ActividadViewModel::class.java)) {
-            return ActividadViewModel(repository) as T
+            return ActividadViewModel(repository, preferencias) as T
         }
 
         throw IllegalArgumentException(

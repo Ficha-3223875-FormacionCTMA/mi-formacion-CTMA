@@ -1,8 +1,7 @@
-- `[x]` Actualizar modelos de dominio y entidad con el campo `resuelto`
-- `[x]` Actualizar el mapeador `ActividadMapper.kt`
-- `[x]` Configurar la migración de versión 1 a versión 2 en `AppDatabase` y `DatabaseProvider`
-- `[x]` Añadir la función de búsqueda en el `ActividadRepository`
-- `[x]` Rediseñar `ActividadViewModel` para soportar búsqueda y filtros reactivos en tiempo real
-- `[x]` Integrar los controles de búsqueda, filtros y campos de `resuelto` en `ui/navegacion.kt`
-- `[x]` Crear la prueba instrumentada `BaseDatosTest.kt` para certificar la migración y el DAO
-- `[x]` Ejecutar las comprobaciones y actualizar la documentación en `README.md`
+- `[x]` Preparación del Entorno: Añadir dependencias en `build.gradle.kts` y `libs.versions.toml`
+- `[x]` Definición de Estados: Crear `ActividadUiState.kt` (Parte de Miguel)
+- `[x]` Evolución del Repositorio: Asegurar flujos y manejo de errores (Parte de Laverde)
+- `[x]` Refactorización del ViewModel: Implementar `StateFlow`, `UiState` y búsqueda cancelable (Parte de Miguel)
+- `[x]` Interfaz Reactiva: Migrar a `collectAsStateWithLifecycle` y representar estados (Parte de Arrunchis)
+- `[x]` Pruebas Unitarias: Crear `ActividadViewModelTest` con `runTest` (Parte de JD)
+- `[x]` Verificación final y actualización de `README.md`

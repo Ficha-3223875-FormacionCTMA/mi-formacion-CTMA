@@ -1,37 +1,37 @@
-# Walkthrough: Integración de UI, Búsqueda y Migración de Room (Guía 6)
+# Walkthrough - Semana 7: Reactividad Avanzada con Corrutinas y Flows
 
-Se han completado satisfactoriamente todos los requerimientos de la Guía 6, logrando una integración fluida entre la interfaz de usuario reactiva y la base de datos persistente.
+Se ha evolucionado la arquitectura de **Mi Formación CTMA** hacia un modelo totalmente reactivo, implementando una gestión de estados robusta y optimizando el consumo de datos desde la base de datos.
 
-## 🏗️ Migración y Evolución de Datos
+## Cambios Principales
 
-Se realizó la migración del esquema de la base de datos de la **Versión 1 a la Versión 2**. Se añadió el campo `resuelto` (Boolean) tanto en la capa de datos (Entity) como en la de dominio (Domain).
+### 🔄 Gestión de Estados con UiState
+Se introdujeron interfaces selladas (`sealed interface`) para representar de forma explícita lo que sucede en la pantalla:
+- **ListadoUiState:** Permite a la UI reaccionar a estados de `Cargando`, `Contenido`, `Vacio` o `Error`.
+- **OperacionUiState:** Gestiona el ciclo de vida de las operaciones de escritura (inserción, edición, eliminación), informando si están `EnCurso`, si fueron `Exitosas` o si han `Fallado`.
 
-> [!NOTE]
-> La migración utiliza un script `ALTER TABLE` que asigna `DEFAULT 0 (false)` a los registros existentes para prevenir errores de nulabilidad y asegurar la integridad de la información previa.
+### ⚡ Flujos de Datos Optimizados
+- **StateFlow:** El `ActividadViewModel` ahora utiliza `stateIn` para transformar flujos fríos del repositorio en flujos de estado calientes, manteniendo la última emisión disponible para la UI.
+- **Búsqueda Cancelable:** Se implementó `flatMapLatest` en la lógica de búsqueda. Esto garantiza que si el usuario escribe rápidamente, las consultas previas a SQLite se cancelan automáticamente, ahorrando recursos.
 
-## 🔍 Interfaz Reactiva y Búsqueda
+### 🎨 UI Resiliente y Eficiente
+- **collectAsStateWithLifecycle:** Se migró el consumo de flujos en Compose a esta API de ciclo de vida seguro, lo que evita el procesamiento de datos cuando la app está en segundo plano.
+- **Indicadores Visuales:** Se añadieron componentes como `CircularProgressIndicator` y mensajes de error descriptivos basados en el estado actual.
 
-La pantalla de lista (`ListaRoute`) ahora es totalmente dinámica:
-- **Búsqueda en tiempo real:** Al escribir en la nueva barra de búsqueda, el `ActividadViewModel` lanza consultas optimizadas al DAO (`buscarPorTexto`), filtrando por título o descripción instantáneamente.
-- **Filtro de Urgencia:** Se añadió un interruptor para mostrar solo las actividades que requieren atención inmediata (<= 3 días), utilizando la lógica de negocio centralizada en `ReglasActividad`.
+### 🧪 Pruebas Unitarias de Corrutinas
+Se creó la suite [ActividadViewModelTest.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/test/java/com/example/miformacionctma/ui/actividad/ActividadViewModelTest.kt) que certifica:
+- La correcta emisión de estados iniciales.
+- El filtrado de datos mediante la búsqueda.
+- La gestión de la concurrencia y el tiempo virtual con `runTest`.
 
-## 🎨 Formularios Mejorados
+## Verificación
 
-Los formularios de **Crear** y **Editar** actividad ahora incluyen:
-- Un campo de selección (**Checkbox**) para el estado "Resuelto".
-- Persistencia garantizada al guardar cambios.
-- Colores personalizados (Texto negro, Fondo blanco) para asegurar una visibilidad óptima en cualquier tema.
+- **Pruebas Unitarias:** Ejecutadas exitosamente (`14 passed`).
+- **Manual:** Se verificó en el emulador que la búsqueda es instantánea y que la UI responde correctamente a los cambios de Room sin parpadeos ni bloqueos.
 
-## 🧪 Calidad y Pruebas
-
-Se implementó una suite de pruebas instrumentadas en [BaseDatosTest.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/androidTest/java/com/example/miformacionctma/data/local/BaseDatosTest.kt) que valida:
-1. La inserción y recuperación exitosa de actividades con el nuevo campo.
-2. La precisión de los resultados de búsqueda directamente desde SQLite.
-
----
-
-### 🎥 Verificación Manual
-1. Abrir la app ➔ Los datos antiguos siguen ahí.
-2. Crear actividad con `resuelto = true` ➔ Se guarda correctamente.
-3. Buscar "Android" ➔ La lista se filtra al instante.
-4. Cerrar y abrir ➔ Todo permanece intacto.
+```kotlin
+// Ejemplo del nuevo flujo reactivo en el ViewModel
+val uiState: StateFlow<ListadoUiState> = combine(_textoBusqueda, _soloUrgentes) { ... }
+    .flatMapLatest { (query, urgentes) -> repository.buscar(query) }
+    .map { lista -> if (lista.isEmpty()) Vacio else Contenido(lista) }
+    .stateIn(scope = viewModelScope, ...)
+```

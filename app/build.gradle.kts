@@ -64,6 +64,7 @@ dependencies {
     // Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     // Navigation
     implementation(libs.androidx.navigation.compose)
@@ -83,6 +84,9 @@ dependencies {
     // Pruebas unitarias
     testImplementation(libs.junit)
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 
     // Pruebas Android
     androidTestImplementation(platform(libs.androidx.compose.bom))

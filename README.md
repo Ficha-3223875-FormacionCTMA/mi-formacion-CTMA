@@ -542,33 +542,38 @@ En esta etapa se completó la integración total de la capa de datos con la inte
 Se actualizó la estructura de la base de datos local para incluir el campo `resuelto`, permitiendo marcar actividades como finalizadas independientemente de su progreso.
 
 *   **Campo añadido:** `resuelto` (Boolean / INTEGER en SQLite).
-*   **Valor inicial:** `false` (0) para todos los registros existentes.
-*   **Script de Migración:** 
-    ```sql
-    ALTER TABLE actividades ADD COLUMN resuelto INTEGER NOT NULL DEFAULT 0
-    ```
-*   **Persistencia:** Se verificó que tras la migración, las actividades creadas en la versión 1 conservan todos sus datos intactos.
+*   **Script de Migración:** `ALTER TABLE actividades ADD COLUMN resuelto INTEGER NOT NULL DEFAULT 0`
 
 ## 🔍 2. Búsqueda y Filtrado Reactivo
 
-La interfaz de usuario ahora ofrece una experiencia de filtrado en tiempo real sin necesidad de recargas manuales:
+La interfaz de usuario ofrece una experiencia de filtrado en tiempo real sin necesidad de recargas manuales, utilizando consultas SQL directas al DAO.
 
-*   **Búsqueda Global:** Un campo de texto en la lista permite buscar coincidencias parciales por **título** o **descripción** directamente desde SQLite.
-*   **Filtro de Urgencia:** Un interruptor (`Switch`) permite visualizar instantáneamente solo aquellas tareas con menos de 3 días restantes y progreso incompleto.
-*   **Tecnología:** Se utiliza el operador `flatMapLatest` y `combine` de Kotlin Flows para reaccionar a los cambios de estado del ViewModel.
+---
 
-## 🧪 3. Plan de Pruebas Instrumentadas (DAO y Estructura)
+# Semana 7 — Corrutinas, Flujos y Estados de UI
 
-Se implementó una suite de pruebas instrumentadas en `BaseDatosTest.kt` para garantizar la integridad de los datos:
+En esta etapa se evolucionó la arquitectura hacia un modelo 100% reactivo y resiliente, integrando Corrutinas de Kotlin y flujos de datos avanzados.
 
-| Prueba | Propósito | Resultado |
-| :--- | :--- | :--- |
-| `testDaoOperaciones` | Valida inserción, recuperación por ID y el nuevo campo `resuelto`. | **EXITOSO** |
-| `Búsqueda DAO` | Confirma que la consulta SQL de búsqueda devuelve resultados precisos. | **EXITOSO** |
+## ⚡ 1. Flujo de Datos Reactivo (Flow & StateFlow)
 
-## ✅ 4. Verificación de Persistencia
+Se implementó una tubería de datos que conecta Room directamente con la interfaz de usuario:
+*   **Repositorios:** Exponen `Flow<List<ActividadFormativa>>` asegurando actualizaciones en tiempo real.
+*   **ViewModel:** Transforma los flujos fríos en `StateFlow` mediante el operador `stateIn` dentro del `viewModelScope`.
+*   **UI:** Consume los estados de forma segura con `collectAsStateWithLifecycle`, optimizando el uso de recursos y batería.
 
-Se realizaron pruebas de ciclo de vida completo:
-1.  **Registro de actividad** con éxito.
-2.  **Cierre forzado** de la aplicación.
-3.  **Reapertura:** Los datos persisten correctamente en la base de datos física del dispositivo/emulador.
+## 🔄 2. Gestión de Estados (UiState)
+
+La aplicación ahora es consciente de su estado interno en todo momento:
+*   **ListadoUiState:** Maneja los estados `Cargando`, `Contenido`, `Vacio` y `Error`.
+*   **OperacionUiState:** Controla el ciclo de vida de inserciones, ediciones y eliminaciones (`Inactiva`, `EnCurso`, `Exitosa`, `Fallida`).
+
+## 🔍 3. Búsqueda Optimizada y Cancelable
+
+Se implementó una búsqueda reactiva que utiliza el operador `flatMapLatest`. Esto garantiza que si el usuario escribe rápidamente, las consultas anteriores a la base de datos se cancelan automáticamente, procesando solo el término final.
+
+## 🧪 4. Pruebas de Corrutinas (runTest)
+
+Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewModelTest`) utilizando:
+*   `StandardTestDispatcher` y `UnconfinedTestDispatcher` para controlar el tiempo virtual.
+*   `runTest` para validar emisiones de flujos y transiciones de estado.
+*   Mocks de repositorios para aislar la lógica del ViewModel.

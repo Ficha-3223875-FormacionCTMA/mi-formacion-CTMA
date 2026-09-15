@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.miformacionctma.data.local.DatabaseProvider
 import com.example.miformacionctma.data.repository.ActividadRepository
+import com.example.miformacionctma.data.repository.PreferenciasRepository
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
 import com.example.miformacionctma.domain.ReglasActividad
@@ -63,8 +64,13 @@ class MainActivity : ComponentActivity() {
             database.actividadDao()
         )
 
+        val preferenciasRepository = PreferenciasRepository(
+            applicationContext
+        )
+
         val factory = ActividadViewModelFactory(
-            repository
+            repository,
+            preferenciasRepository
         )
 
         setContent {
