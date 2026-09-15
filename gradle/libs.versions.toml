@@ -14,6 +14,9 @@ lifecycleViewModelCompose = "2.8.7"
 room = "3.0.3"
 sqlite = "2.7.1"
 
+# DataStore
+datastore = "1.2.1"
+
 # KSP compatible con Kotlin 2.1.0
 ksp = "2.1.0-1.0.29"
 
@@ -67,14 +70,15 @@ androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.
 
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 
-
+# DataStore
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
 [plugins]
 
-android-application = { id = "com.android.application", version.ref = "agp" }
+androidApplication = { id = "com.android.application", version.ref = "agp" }
 
-kotlin-android-setup = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlinAndroidSetup = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
-kotlin-compose-setup = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlinComposeSetup = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

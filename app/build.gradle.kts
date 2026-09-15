@@ -1,7 +1,8 @@
+
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android.setup)
-    alias(libs.plugins.kotlin.compose.setup)
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroidSetup)
+    alias(libs.plugins.kotlinComposeSetup)
     alias(libs.plugins.ksp)
 }
 
@@ -65,6 +66,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
     // Navigation
     implementation(libs.androidx.navigation.compose)
 
@@ -76,6 +78,9 @@ dependencies {
     implementation(libs.androidx.sqlite)
     implementation(libs.androidx.sqlite.ktx)
     implementation(libs.androidx.sqlite.framework)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Pruebas unitarias
     testImplementation(libs.junit)
@@ -91,3 +96,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
