@@ -1,0 +1,4 @@
+- `[x]` Configurar Surface en MainActivity para aplicar fondo del tema
+- `[x]` Personalizar colores de OutlinedTextField en CrearRoute (navegacion.kt)
+- `[x]` Personalizar colores de OutlinedTextField en EditarRoute (navegacion.kt)
+- `[x]` Verificar cambios en el emulador
