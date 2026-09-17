@@ -3,6 +3,7 @@ package com.example.miformacionctma.data.repository
 import com.example.miformacionctma.data.local.dao.ActividadDao
 import com.example.miformacionctma.data.mapper.toDomain
 import com.example.miformacionctma.data.mapper.toEntity
+import com.example.miformacionctma.data.remote.ActividadRemoteDataSource
 import com.example.miformacionctma.domain.ActividadFormativa
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -11,8 +12,22 @@ import kotlinx.coroutines.flow.map
 
 class ActividadRepository(
     private val actividadDao: ActividadDao,
-    private val preferenciasRepository: PreferenciasRepository
+    private val preferenciasRepository: PreferenciasRepository,
+    private val remoteDataSource: ActividadRemoteDataSource
 ) {
+
+    /**
+     * Sincroniza los datos locales con el servidor remoto.
+     * Si la red falla, la excepción se propaga al ViewModel.
+     */
+    suspend fun sincronizar() {
+        val actividadesRemotas = remoteDataSource.obtenerActividades()
+        // Estrategia: Reemplazar o actualizar los datos locales con los remotos.
+        // Aquí usamos los mappers existentes para la persistencia.
+        actividadesRemotas.forEach { actividad ->
+            actividadDao.insertar(actividad.toEntity())
+        }
+    }
 
     fun obtenerTodas(): Flow<List<ActividadFormativa>> {
         return actividadDao.obtenerTodas()

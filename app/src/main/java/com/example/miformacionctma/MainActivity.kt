@@ -66,7 +66,15 @@ class MainActivity : ComponentActivity() {
 
         val repository = ActividadRepository(
             actividadDao = database.actividadDao(),
-            preferenciasRepository = preferenciasRepository
+            preferenciasRepository = preferenciasRepository,
+            remoteDataSource = object : com.example.miformacionctma.data.remote.ActividadRemoteDataSource {
+                override suspend fun obtenerActividades(): List<ActividadFormativa> {
+                    // PUNTO DE INTEGRACIÓN: Miguel implementará Retrofit aquí (Semana 8).
+                    // Se lanza IllegalStateException (Exception) para que el ViewModel pueda capturarlo
+                    // y mostrar el estado de error/caché sin provocar un crash de la aplicación.
+                    throw IllegalStateException("La implementación de Retrofit para el consumo de API corresponde a Miguel.")
+                }
+            }
         )
 
         val factory = ActividadViewModelFactory(
