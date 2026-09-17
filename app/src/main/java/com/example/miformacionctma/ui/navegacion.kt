@@ -20,8 +20,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +49,8 @@ import androidx.navigation.navArgument
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.ui.actividad.ListadoUiState
 import com.example.miformacionctma.ui.actividad.ActividadViewModel
+import com.example.miformacionctma.ui.actividad.OperacionUiState
+import com.example.miformacionctma.ui.actividad.ResumenHeader
 
 private const val ARG_ID = "id"
 
@@ -174,6 +180,23 @@ fun ListaRoute(
 ) {
     val textoBusqueda by viewModel.textoBusqueda.collectAsStateWithLifecycle()
     val soloUrgentes by viewModel.soloUrgentes.collectAsStateWithLifecycle()
+    val operacionState by viewModel.operacionState.collectAsStateWithLifecycle()
+    
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(operacionState) {
+        when (operacionState) {
+            OperacionUiState.Exitosa -> {
+                snackbarHostState.showSnackbar("Operación realizada con éxito")
+                viewModel.resetearEstadoOperacion()
+            }
+            is OperacionUiState.Fallida -> {
+                snackbarHostState.showSnackbar("Error: ${(operacionState as OperacionUiState.Fallida).mensaje}")
+                viewModel.resetearEstadoOperacion()
+            }
+            else -> {}
+        }
+    }
 
     val coloresCampos = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
@@ -183,126 +206,123 @@ fun ListaRoute(
         cursorColor = Color.Black
     )
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Mis actividades",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Barra de Búsqueda reactiva en tiempo real (DAO query)
-        OutlinedTextField(
-            value = textoBusqueda,
-            onValueChange = { viewModel.actualizarBusqueda(it) },
-            label = { Text("Buscar por título o descripción...") },
-            colors = coloresCampos,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Filtro de Urgencia reactivo
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
         ) {
-            Text(text = "Mostrar solo urgentes (<= 3 días)", style = MaterialTheme.typography.bodyMedium)
-            Switch(
-                checked = soloUrgentes,
-                onCheckedChange = { viewModel.cambiarFiltroUrgentes(it) }
+            Text(
+                text = "Mis actividades",
+                style = MaterialTheme.typography.titleLarge
             )
-        }
 
-        Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-        Button(
-            onClick = onCrearClick,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Nueva actividad")
-        }
+            // Barra de Búsqueda reactiva en tiempo real (DAO query)
+            OutlinedTextField(
+                value = textoBusqueda,
+                onValueChange = { viewModel.actualizarBusqueda(it) },
+                label = { Text("Buscar por título o descripción...") },
+                colors = coloresCampos,
+                modifier = Modifier.fillMaxWidth()
+            )
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-        when (uiState) {
-            ListadoUiState.Cargando -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+            // Filtro de Urgencia reactivo
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Mostrar solo urgentes (<= 3 días)", style = MaterialTheme.typography.bodyMedium)
+                Switch(
+                    checked = soloUrgentes,
+                    onCheckedChange = { viewModel.cambiarFiltroUrgentes(it) }
+                )
             }
-            is ListadoUiState.Contenido -> {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(
-                        items = uiState.actividades,
-                        key = { it.id }
-                    ) { actividad ->
-                        Column(modifier = Modifier.fillMaxWidth()) {
-                            TarjetaActividad(
-                                actividad = actividad,
-                                onClick = { onActividadClick(actividad.id) }
-                            )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
+            Button(
+                onClick = onCrearClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Nueva actividad")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            when (uiState) {
+                ListadoUiState.Cargando -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+                is ListadoUiState.Contenido -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // ITEM DE RESUMEN (REGLAS DE NEGOCIO)
+                        item {
+                            ResumenHeader(actividades = uiState.actividades)
+                        }
+
+                        items(
+                            items = uiState.actividades,
+                            key = { it.id }
+                        ) { actividad ->
+                            Column(modifier = Modifier.fillMaxWidth()) {
+                                TarjetaActividad(
+                                    actividad = actividad,
+                                    onClick = { onActividadClick(actividad.id) },
+                                    onEliminar = { viewModel.eliminar(actividad) }
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
                                 OutlinedButton(
                                     onClick = { onEditarClick(actividad.id) },
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.fillMaxWidth()
                                 ) {
-                                    Text("Editar")
-                                }
-
-                                Button(
-                                    onClick = { viewModel.eliminar(actividad) },
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text("Eliminar")
+                                    Text("Editar detalles")
                                 }
                             }
                         }
                     }
                 }
-            }
-            ListadoUiState.Vacio -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay actividades que coincidan con los filtros.")
+                ListadoUiState.Vacio -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("No hay actividades que coincidan con los filtros.")
+                    }
                 }
-            }
-            is ListadoUiState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Error: ${uiState.mensaje}", color = MaterialTheme.colorScheme.error)
+                is ListadoUiState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("Error: ${uiState.mensaje}", color = MaterialTheme.colorScheme.error)
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * Destino: Crear con campo de resuelto incorporado.
- */
 @Composable
-fun CrearRoute(
-    viewModel: ActividadViewModel,
-    onGuardar: () -> Unit,
+fun FormularioActividad(
+    actividadInicial: ActividadFormativa?,
+    onGuardar: (ActividadFormativa) -> Unit,
     onCancelar: () -> Unit,
+    tituloPantalla: String,
     modifier: Modifier = Modifier
 ) {
-    var titulo by remember { mutableStateOf("") }
-    var descripcion by remember { mutableStateOf("") }
-    var progresoTexto by remember { mutableStateOf("0") }
-    var diasTexto by remember { mutableStateOf("0") }
-    var resuelto by remember { mutableStateOf(false) }
+    var titulo by remember(actividadInicial?.id) { mutableStateOf(actividadInicial?.titulo ?: "") }
+    var descripcion by remember(actividadInicial?.id) { mutableStateOf(actividadInicial?.descripcion ?: "") }
+    var progresoTexto by remember(actividadInicial?.id) { mutableStateOf(actividadInicial?.progreso?.toString() ?: "0") }
+    var diasTexto by remember(actividadInicial?.id) { mutableStateOf(actividadInicial?.diasRestantes?.toString() ?: "0") }
+    var resuelto by remember(actividadInicial?.id) { mutableStateOf(actividadInicial?.resuelto ?: false) }
 
     val coloresCampos = OutlinedTextFieldDefaults.colors(
         focusedTextColor = Color.Black,
@@ -321,7 +341,7 @@ fun CrearRoute(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "Crear actividad",
+            text = tituloPantalla,
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -344,7 +364,7 @@ fun CrearRoute(
         OutlinedTextField(
             value = progresoTexto,
             onValueChange = { progresoTexto = it },
-            label = { Text("Progreso") },
+            label = { Text("Progreso (%)") },
             colors = coloresCampos,
             modifier = Modifier.fillMaxWidth()
         )
@@ -380,15 +400,14 @@ fun CrearRoute(
                     val progreso = progresoTexto.toIntOrNull() ?: 0
                     val diasRestantes = diasTexto.toIntOrNull() ?: 0
 
-                    val nuevaActividad = ActividadFormativa(
+                    val actividad = (actividadInicial ?: ActividadFormativa(titulo = "")).copy(
                         titulo = titulo.trim(),
                         descripcion = descripcion.trim().ifBlank { null },
                         progreso = progreso,
                         diasRestantes = diasRestantes,
                         resuelto = resuelto
                     )
-                    viewModel.insertar(nuevaActividad)
-                    onGuardar()
+                    onGuardar(actividad)
                 },
                 modifier = Modifier.weight(1f)
             ) {
@@ -403,6 +422,28 @@ fun CrearRoute(
             }
         }
     }
+}
+
+/**
+ * Destino: Crear con campo de resuelto incorporado.
+ */
+@Composable
+fun CrearRoute(
+    viewModel: ActividadViewModel,
+    onGuardar: () -> Unit,
+    onCancelar: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    FormularioActividad(
+        actividadInicial = null,
+        tituloPantalla = "Nueva actividad",
+        onGuardar = { actividad ->
+            viewModel.insertar(actividad)
+            onGuardar()
+        },
+        onCancelar = onCancelar,
+        modifier = modifier
+    )
 }
 
 /**
@@ -429,112 +470,16 @@ fun EditarRoute(
         return
     }
 
-    var titulo by remember(actividad.id) { mutableStateOf(actividad.titulo) }
-    var descripcion by remember(actividad.id) { mutableStateOf(actividad.descripcion.orEmpty()) }
-    var progresoTexto by remember(actividad.id) { mutableStateOf(actividad.progreso.toString()) }
-    var diasTexto by remember(actividad.id) { mutableStateOf(actividad.diasRestantes.toString()) }
-    var resuelto by remember(actividad.id) { mutableStateOf(actividad.resuelto) }
-
-    val coloresCampos = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = Color.Black,
-        unfocusedTextColor = Color.Black,
-        focusedContainerColor = Color.White,
-        unfocusedContainerColor = Color.White,
-        cursorColor = Color.Black,
-        focusedLabelColor = MaterialTheme.colorScheme.primary,
-        unfocusedLabelColor = Color.Gray
-    )
-
-    Column(
+    FormularioActividad(
+        actividadInicial = actividad,
+        tituloPantalla = "Editar actividad",
+        onGuardar = { actualizada ->
+            viewModel.actualizar(actualizada)
+            onGuardar()
+        },
+        onCancelar = onCancelar,
         modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Text(
-            text = "Editar actividad",
-            style = MaterialTheme.typography.titleLarge
-        )
-
-        OutlinedTextField(
-            value = titulo,
-            onValueChange = { titulo = it },
-            label = { Text("Título") },
-            colors = coloresCampos,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = descripcion,
-            onValueChange = { descripcion = it },
-            label = { Text("Descripción") },
-            colors = coloresCampos,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = progresoTexto,
-            onValueChange = { progresoTexto = it },
-            label = { Text("Progreso") },
-            colors = coloresCampos,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        OutlinedTextField(
-            value = diasTexto,
-            onValueChange = { diasTexto = it },
-            label = { Text("Días restantes") },
-            colors = coloresCampos,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = resuelto,
-                onCheckedChange = { resuelto = it }
-            )
-            Text(text = "Actividad resuelta / finalizada", style = MaterialTheme.typography.bodyMedium)
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Button(
-                onClick = {
-                    if (titulo.isBlank()) return@Button
-                    val progreso = progresoTexto.toIntOrNull() ?: actividad.progreso
-                    val diasRestantes = diasTexto.toIntOrNull() ?: actividad.diasRestantes
-
-                    viewModel.actualizar(
-                        actividad.copy(
-                            titulo = titulo.trim(),
-                            descripcion = descripcion.trim().ifBlank { null },
-                            progreso = progreso,
-                            diasRestantes = diasRestantes,
-                            resuelto = resuelto
-                        )
-                    )
-                    onGuardar()
-                },
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Guardar")
-            }
-
-            OutlinedButton(
-                onClick = onCancelar,
-                modifier = Modifier.weight(1f)
-            ) {
-                Text("Cancelar")
-            }
-        }
-    }
+    )
 }
 
 /**

@@ -70,10 +70,10 @@ private fun TarjetaActividadEstadosPreview() {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            TarjetaActividad(actividad = actividadPendiente, onClick = {})
-            TarjetaActividad(actividad = actividadEnProceso, onClick = {})
-            TarjetaActividad(actividad = actividadCompletada, onClick = {})
-            TarjetaActividad(actividad = actividadVencida, onClick = {})
+            TarjetaActividad(actividad = actividadPendiente, onClick = {}, onEliminar = {})
+            TarjetaActividad(actividad = actividadEnProceso, onClick = {}, onEliminar = {})
+            TarjetaActividad(actividad = actividadCompletada, onClick = {}, onEliminar = {})
+            TarjetaActividad(actividad = actividadVencida, onClick = {}, onEliminar = {})
         }
     }
 }
@@ -86,6 +86,7 @@ private fun TarjetaActividadTituloLargoPreview() {
         TarjetaActividad(
             actividad = actividadTituloLargo,
             onClick = {},
+            onEliminar = {},
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -99,6 +100,7 @@ private fun TarjetaActividadFuenteGrandePreview() {
         TarjetaActividad(
             actividad = actividadEnProceso,
             onClick = {},
+            onEliminar = {},
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -112,6 +114,7 @@ private fun TarjetaActividadAnchoAmpliadoPreview() {
         TarjetaActividad(
             actividad = actividadEnProceso,
             onClick = {},
+            onEliminar = {},
             modifier = Modifier.padding(16.dp)
         )
     }
