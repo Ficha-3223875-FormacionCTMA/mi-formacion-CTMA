@@ -60,12 +60,13 @@ class MainActivity : ComponentActivity() {
             applicationContext
         )
 
-        val repository = ActividadRepository(
-            database.actividadDao()
-        )
-
         val preferenciasRepository = PreferenciasRepository(
             applicationContext
+        )
+
+        val repository = ActividadRepository(
+            actividadDao = database.actividadDao(),
+            preferenciasRepository = preferenciasRepository
         )
 
         val factory = ActividadViewModelFactory(
@@ -225,7 +226,8 @@ fun PantallaInicio(
 
                 TarjetaActividad(
                     actividad = actividad,
-                    onClick = {}
+                    onClick = {},
+                    onEliminar = {}
                 )
             }
         }
@@ -254,7 +256,8 @@ fun PantallaInicio(
 
                 TarjetaActividad(
                     actividad = actividadDemo,
-                    onClick = {}
+                    onClick = {},
+                    onEliminar = {}
                 )
 
                 Spacer(
@@ -445,3 +448,4 @@ fun PantallaInicioEstadoVacioPreview() {
         )
     }
 }
+
