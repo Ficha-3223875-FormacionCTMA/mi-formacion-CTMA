@@ -24,6 +24,10 @@ class ActividadViewModel(
     private val preferencias: PreferenciasRepository
 ) : ViewModel() {
 
+    init {
+        refresh()
+    }
+
     private val _textoBusqueda = MutableStateFlow("")
     val textoBusqueda = _textoBusqueda.asStateFlow()
 
@@ -107,5 +111,11 @@ class ActividadViewModel(
     
     fun resetearEstadoOperacion() {
         _operacionState.value = OperacionUiState.Inactiva
+    }
+
+    fun refresh() {
+        viewModelScope.launch {
+            repository.refreshActividades()
+        }
     }
 }

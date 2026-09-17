@@ -1,7 +1,9 @@
-- `[x]` Preparación del Entorno: Añadir dependencias en `build.gradle.kts` y `libs.versions.toml`
-- `[x]` Definición de Estados: Crear `ActividadUiState.kt` (Parte de Miguel)
-- `[x]` Evolución del Repositorio: Asegurar flujos y manejo de errores (Parte de Laverde)
-- `[x]` Refactorización del ViewModel: Implementar `StateFlow`, `UiState` y búsqueda cancelable (Parte de Miguel)
-- `[x]` Interfaz Reactiva: Migrar a `collectAsStateWithLifecycle` y representar estados (Parte de Arrunchis)
-- `[x]` Pruebas Unitarias: Crear `ActividadViewModelTest` con `runTest` (Parte de JD)
-- `[x]` Verificación final y actualización de `README.md`
+- `[x]` Crear paquetes `data/remote/dto`, `data/remote/api`, `data/remote/auth`
+- `[x]` Implementar `ActividadDto.kt` con `@Serializable`
+- `[x]` Actualizar `ActividadMapper.kt` con mapeos DTO -> Entity
+- `[x]` Configurar `NetworkModule.kt` (Retrofit + OkHttp)
+- `[x]` Definir interface `ActividadApiService.kt`
+- `[x]` Implementar `RemoteActividadDataSource.kt` con clasificación de errores
+- `[x]` Actualizar `ActividadRepository.kt` para integrar el flujo de red (Refresh)
+- `[x]` Implementar `TokenProvider.kt`
+- `[x]` Actualizar README con diagrama de arquitectura técnica

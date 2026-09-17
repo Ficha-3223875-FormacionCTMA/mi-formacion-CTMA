@@ -1,37 +1,37 @@
-# Walkthrough - Semana 7: Reactividad Avanzada con Corrutinas y Flows
+# Walkthrough - Semana 8: Networking y Sincronización (Offline-First)
 
-Se ha evolucionado la arquitectura de **Mi Formación CTMA** hacia un modelo totalmente reactivo, implementando una gestión de estados robusta y optimizando el consumo de datos desde la base de datos.
+Se ha completado la integración de la capa de red para el perfil de **Miguel**, permitiendo que la aplicación se sincronice con un servidor externo mientras mantiene su funcionalidad sin conexión.
 
-## Cambios Principales
+## Logros Técnicos
 
-### 🔄 Gestión de Estados con UiState
-Se introdujeron interfaces selladas (`sealed interface`) para representar de forma explícita lo que sucede en la pantalla:
-- **ListadoUiState:** Permite a la UI reaccionar a estados de `Cargando`, `Contenido`, `Vacio` o `Error`.
-- **OperacionUiState:** Gestiona el ciclo de vida de las operaciones de escritura (inserción, edición, eliminación), informando si están `EnCurso`, si fueron `Exitosas` o si han `Fallado`.
+### 🌐 Capa de Red Robusta
+Se configuró **Retrofit** con **Kotlinx Serialization** para procesar los datos del servidor. Se incluyeron interceptores de OkHttp para:
+- **Logging:** Visualizar todas las peticiones y respuestas en el Logcat durante el desarrollo.
+- **Autenticación:** Añadir automáticamente el encabezado `Authorization: Bearer <token>` mediante un `TokenProvider`.
 
-### ⚡ Flujos de Datos Optimizados
-- **StateFlow:** El `ActividadViewModel` ahora utiliza `stateIn` para transformar flujos fríos del repositorio en flujos de estado calientes, manteniendo la última emisión disponible para la UI.
-- **Búsqueda Cancelable:** Se implementó `flatMapLatest` en la lógica de búsqueda. Esto garantiza que si el usuario escribe rápidamente, las consultas previas a SQLite se cancelan automáticamente, ahorrando recursos.
+### 🔄 Sincronización Offline-First
+El `ActividadRepository` ahora orquestra la sincronización:
+- Al iniciar la app, se dispara un `refreshActividades()` que descarga los datos remotos y los guarda en **Room**.
+- Room sigue siendo la única fuente de verdad para la UI, garantizando que el usuario siempre vea datos, incluso sin internet.
 
-### 🎨 UI Resiliente y Eficiente
-- **collectAsStateWithLifecycle:** Se migró el consumo de flujos en Compose a esta API de ciclo de vida seguro, lo que evita el procesamiento de datos cuando la app está en segundo plano.
-- **Indicadores Visuales:** Se añadieron componentes como `CircularProgressIndicator` y mensajes de error descriptivos basados en el estado actual.
+### 🛡️ Manejo de Errores Avanzado
+Se implementó una clasificación de errores en `RemoteActividadDataSource` para capturar específicamente:
+- Fallos de conectividad (`IOException`).
+- Sesiones expiradas (`401`).
+- Recursos no encontrados (`404`).
 
-### 🧪 Pruebas Unitarias de Corrutinas
-Se creó la suite [ActividadViewModelTest.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/test/java/com/example/miformacionctma/ui/actividad/ActividadViewModelTest.kt) que certifica:
-- La correcta emisión de estados iniciales.
-- El filtrado de datos mediante la búsqueda.
-- La gestión de la concurrencia y el tiempo virtual con `runTest`.
+## Cambios en la Arquitectura
 
-## Verificación
+Se introdujeron los siguientes componentes nuevos:
+- **`ActividadDto`**: Modelo de datos específico para la transferencia por red.
+- **`ActividadApiService`**: Definición de los contratos de los endpoints.
+- **`ActividadMapper`**: Extensiones para convertir entre DTO, Entity y Domain de forma limpia.
 
-- **Pruebas Unitarias:** Ejecutadas exitosamente (`14 passed`).
-- **Manual:** Se verificó en el emulador que la búsqueda es instantánea y que la UI responde correctamente a los cambios de Room sin parpadeos ni bloqueos.
+## Verificación Realizada
 
-```kotlin
-// Ejemplo del nuevo flujo reactivo en el ViewModel
-val uiState: StateFlow<ListadoUiState> = combine(_textoBusqueda, _soloUrgentes) { ... }
-    .flatMapLatest { (query, urgentes) -> repository.buscar(query) }
-    .map { lista -> if (lista.isEmpty()) Vacio else Contenido(lista) }
-    .stateIn(scope = viewModelScope, ...)
-```
+1. **Compilación:** El proyecto compila correctamente con todas las nuevas dependencias de red.
+2. **Arquitectura:** Se verificó que el flujo cumple con la separación de responsabilidades (Clean Architecture).
+3. **Persistencia:** Se validó que la lógica de sincronización actualiza correctamente la base de datos local de Room.
+
+> [!TIP]
+> Para probar la autenticación, puedes usar `TokenProvider.setToken("tu_token")` en el `MainActivity` y observar las peticiones en el Logcat filtrando por `OkHttp`.

@@ -36,6 +36,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.miformacionctma.data.local.DatabaseProvider
+import com.example.miformacionctma.data.remote.NetworkModule
+import com.example.miformacionctma.data.remote.RemoteActividadDataSource
+import com.example.miformacionctma.data.remote.api.ActividadApiService
 import com.example.miformacionctma.data.repository.ActividadRepository
 import com.example.miformacionctma.data.repository.PreferenciasRepository
 import com.example.miformacionctma.domain.ActividadFormativa
@@ -64,8 +67,12 @@ class MainActivity : ComponentActivity() {
             applicationContext
         )
 
+        val apiService = NetworkModule.retrofit.create(ActividadApiService::class.java)
+        val remoteDataSource = RemoteActividadDataSource(apiService)
+
         val repository = ActividadRepository(
             actividadDao = database.actividadDao(),
+            remoteDataSource = remoteDataSource,
             preferenciasRepository = preferenciasRepository
         )
 
