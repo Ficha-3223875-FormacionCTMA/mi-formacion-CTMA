@@ -26,6 +26,13 @@ class ActividadRepository(
             .map { it?.toDomain() }
     }
 
+    fun buscarPorTexto(query: String): Flow<List<ActividadFormativa>> {
+        return actividadDao.buscarPorTexto(query)
+            .map { actividades ->
+                actividades.map { it.toDomain() }
+            }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun obtenerActividadesFiltradas(): Flow<List<ActividadFormativa>> {
         return preferenciasRepository.textoBusqueda
@@ -59,4 +66,3 @@ class ActividadRepository(
         actividadDao.eliminar(actividad.toEntity())
     }
 }
-

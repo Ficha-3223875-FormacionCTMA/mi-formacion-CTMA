@@ -65,10 +65,14 @@ dependencies {
     // Android
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Room 3
     implementation(libs.androidx.room3.runtime)
@@ -85,12 +89,16 @@ dependencies {
     // Pruebas unitarias
     testImplementation(libs.junit)
     testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 
     // Pruebas Android
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.room3.testing)
 
     // Debug
     debugImplementation(libs.androidx.compose.ui.test.manifest)

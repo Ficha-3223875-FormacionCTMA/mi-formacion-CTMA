@@ -530,3 +530,50 @@ A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchi
 ### 3.6 Bitácora Técnica de Observación
 > **Aviso de Persistencia en Entorno DummyJSON:**  
 > Se deja constancia explícita en la bitácora de que **DummyJSON** opera únicamente como un entorno *mock / REST API* simulado[cite: 1]. Si bien procesa peticiones HTTP (`GET`, `POST`, `PUT`, `DELETE`) respondiendo con códigos de estado estandarizados[cite: 1], **sus operaciones de escritura no persisten modificaciones en la base de datos real del servidor**[cite: 1]. Cualquier recurso creado o editado devuelve una respuesta simulada en el acto, por lo que consultas subsecuentes a dicho recurso reflejarán únicamente los datos por defecto del servidor[cite: 1].
+
+---
+
+# Semana 6 — Migración de Base de Datos y UI Reactiva (Room v2)
+
+En esta etapa se completó la integración total de la capa de datos con la interfaz de usuario, se implementó la primera migración de esquema y se añadieron capacidades de búsqueda avanzada.
+
+## 🏗️ 1. Migración de Room (Versión 1 ➔ 2)
+
+Se actualizó la estructura de la base de datos local para incluir el campo `resuelto`, permitiendo marcar actividades como finalizadas independientemente de su progreso.
+
+*   **Campo añadido:** `resuelto` (Boolean / INTEGER en SQLite).
+*   **Script de Migración:** `ALTER TABLE actividades ADD COLUMN resuelto INTEGER NOT NULL DEFAULT 0`
+
+## 🔍 2. Búsqueda y Filtrado Reactivo
+
+La interfaz de usuario ofrece una experiencia de filtrado en tiempo real sin necesidad de recargas manuales, utilizando consultas SQL directas al DAO.
+
+---
+
+# Semana 7 — Corrutinas, Flujos y Estados de UI
+
+En esta etapa se evolucionó la arquitectura hacia un modelo 100% reactivo y resiliente, integrando Corrutinas de Kotlin y flujos de datos avanzados.
+
+## ⚡ 1. Flujo de Datos Reactivo (Flow & StateFlow)
+
+Se implementó una tubería de datos que conecta Room directamente con la interfaz de usuario:
+*   **Repositorios:** Exponen `Flow<List<ActividadFormativa>>` asegurando actualizaciones en tiempo real.
+*   **ViewModel:** Transforma los flujos fríos en `StateFlow` mediante el operador `stateIn` dentro del `viewModelScope`.
+*   **UI:** Consume los estados de forma segura con `collectAsStateWithLifecycle`, optimizando el uso de recursos y batería.
+
+## 🔄 2. Gestión de Estados (UiState)
+
+La aplicación ahora es consciente de su estado interno en todo momento:
+*   **ListadoUiState:** Maneja los estados `Cargando`, `Contenido`, `Vacio` y `Error`.
+*   **OperacionUiState:** Controla el ciclo de vida de inserciones, ediciones y eliminaciones (`Inactiva`, `EnCurso`, `Exitosa`, `Fallida`).
+
+## 🔍 3. Búsqueda Optimizada y Cancelable
+
+Se implementó una búsqueda reactiva que utiliza el operador `flatMapLatest`. Esto garantiza que si el usuario escribe rápidamente, las consultas anteriores a la base de datos se cancelan automáticamente, procesando solo el término final.
+
+## 🧪 4. Pruebas de Corrutinas (runTest)
+
+Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewModelTest`) utilizando:
+*   `StandardTestDispatcher` y `UnconfinedTestDispatcher` para controlar el tiempo virtual.
+*   `runTest` para validar emisiones de flujos y transiciones de estado.
+*   Mocks de repositorios para aislar la lógica del ViewModel.

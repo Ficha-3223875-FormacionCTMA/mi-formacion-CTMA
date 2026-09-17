@@ -1,0 +1,7 @@
+- `[x]` Preparación del Entorno: Añadir dependencias en `build.gradle.kts` y `libs.versions.toml`
+- `[x]` Definición de Estados: Crear `ActividadUiState.kt` (Parte de Miguel)
+- `[x]` Evolución del Repositorio: Asegurar flujos y manejo de errores (Parte de Laverde)
+- `[x]` Refactorización del ViewModel: Implementar `StateFlow`, `UiState` y búsqueda cancelable (Parte de Miguel)
+- `[x]` Interfaz Reactiva: Migrar a `collectAsStateWithLifecycle` y representar estados (Parte de Arrunchis)
+- `[x]` Pruebas Unitarias: Crear `ActividadViewModelTest` con `runTest` (Parte de JD)
+- `[x]` Verificación final y actualización de `README.md`

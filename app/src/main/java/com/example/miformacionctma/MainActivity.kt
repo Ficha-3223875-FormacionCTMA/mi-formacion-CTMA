@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -69,19 +70,23 @@ class MainActivity : ComponentActivity() {
         )
 
         val factory = ActividadViewModelFactory(
-            repository
+            repository,
+            preferenciasRepository
         )
 
         setContent {
             MiFormacionCTMATheme {
-
                 val actividadViewModel: ActividadViewModel = viewModel(
                     factory = factory
                 )
-
-                GrafoNavegacion(
-                    viewModel = actividadViewModel
-                )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    GrafoNavegacion(
+                        viewModel = actividadViewModel
+                    )
+                }
             }
         }
     }
@@ -221,7 +226,8 @@ fun PantallaInicio(
 
                 TarjetaActividad(
                     actividad = actividad,
-                    onClick = {}
+                    onClick = {},
+                    onEliminar = {}
                 )
             }
         }
@@ -250,7 +256,8 @@ fun PantallaInicio(
 
                 TarjetaActividad(
                     actividad = actividadDemo,
-                    onClick = {}
+                    onClick = {},
+                    onEliminar = {}
                 )
 
                 Spacer(
