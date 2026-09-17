@@ -45,6 +45,12 @@ android {
     buildFeatures {
         compose = true
     }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 val jacocoTestReport by tasks.registering(JacocoReport::class) {
@@ -112,6 +118,7 @@ dependencies {
 
     // Pruebas unitarias
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
