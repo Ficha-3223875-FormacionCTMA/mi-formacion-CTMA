@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,6 +37,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.miformacionctma.data.local.DatabaseProvider
+import com.example.miformacionctma.data.remote.NetworkModule
+import com.example.miformacionctma.data.remote.RemoteActividadDataSource
+import com.example.miformacionctma.data.remote.api.ActividadApiService
 import com.example.miformacionctma.data.repository.ActividadRepository
 import com.example.miformacionctma.data.repository.PreferenciasRepository
 import com.example.miformacionctma.domain.ActividadFormativa
@@ -64,17 +68,14 @@ class MainActivity : ComponentActivity() {
             applicationContext
         )
 
+        // Configuración de la capa remota (Implementación de Miguel)
+        val apiService = NetworkModule.retrofit.create(ActividadApiService::class.java)
+        val remoteDataSource = RemoteActividadDataSource(apiService)
+
         val repository = ActividadRepository(
             actividadDao = database.actividadDao(),
             preferenciasRepository = preferenciasRepository,
-            remoteDataSource = object : com.example.miformacionctma.data.remote.ActividadRemoteDataSource {
-                override suspend fun obtenerActividades(): List<ActividadFormativa> {
-                    // PUNTO DE INTEGRACIÓN: Miguel implementará Retrofit aquí (Semana 8).
-                    // Se lanza IllegalStateException (Exception) para que el ViewModel pueda capturarlo
-                    // y mostrar el estado de error/caché sin provocar un crash de la aplicación.
-                    throw IllegalStateException("La implementación de Retrofit para el consumo de API corresponde a Miguel.")
-                }
-            }
+            remoteDataSource = remoteDataSource
         )
 
         val factory = ActividadViewModelFactory(
@@ -456,4 +457,3 @@ fun PantallaInicioEstadoVacioPreview() {
         )
     }
 }
-

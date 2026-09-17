@@ -18,12 +18,11 @@ class ActividadRepository(
 
     /**
      * Sincroniza los datos locales con el servidor remoto.
-     * Si la red falla, la excepción se propaga al ViewModel.
+     * Si la red falla, la excepción se propaga al ViewModel para manejo resiliente.
      */
     suspend fun sincronizar() {
         val actividadesRemotas = remoteDataSource.obtenerActividades()
-        // Estrategia: Reemplazar o actualizar los datos locales con los remotos.
-        // Aquí usamos los mappers existentes para la persistencia.
+        // Sincronizar con Room: reemplazamos/actualizamos datos locales con los remotos.
         actividadesRemotas.forEach { actividad ->
             actividadDao.insertar(actividad.toEntity())
         }
@@ -70,14 +69,30 @@ class ActividadRepository(
     }
 
     suspend fun insertar(actividad: ActividadFormativa): Long {
-        return actividadDao.insertar(actividad.toEntity())
+        val idLocal = actividadDao.insertar(actividad.toEntity())
+        try {
+            remoteDataSource.crearActividad(actividad.copy(id = idLocal))
+        } catch (e: Exception) {
+            // Log error o manejar según política de sincronización
+        }
+        return idLocal
     }
 
     suspend fun actualizar(actividad: ActividadFormativa) {
         actividadDao.actualizar(actividad.toEntity())
+        try {
+            remoteDataSource.actualizarActividad(actividad)
+        } catch (e: Exception) {
+            // Log error
+        }
     }
 
     suspend fun eliminar(actividad: ActividadFormativa) {
         actividadDao.eliminar(actividad.toEntity())
+        try {
+            remoteDataSource.eliminarActividad(actividad.id)
+        } catch (e: Exception) {
+            // Log error
+        }
     }
 }
