@@ -577,3 +577,42 @@ Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewMode
 *   `StandardTestDispatcher` y `UnconfinedTestDispatcher` para controlar el tiempo virtual.
 *   `runTest` para validar emisiones de flujos y transiciones de estado.
 *   Mocks de repositorios para aislar la lógica del ViewModel.
+
+---
+
+# Semana 8 — Networking y Sincronización (Offline-First)
+
+Se integró la capa de red para permitir la sincronización de actividades con un servidor remoto, manteniendo un enfoque "Offline-First" donde la base de datos local sigue siendo la fuente de verdad.
+
+## 🏗️ 1. Arquitectura Técnica de Red
+
+Se implementó el siguiente flujo de datos para la sincronización:
+
+```mermaid
+graph TD
+    A[Servidor API] -- Retrofit + OkHttp --> B[RemoteDataSource]
+    B -- DTOs --> C[Repository]
+    C -- Entidades --> D[(Room Database)]
+    D -- Flow --> E[ViewModel]
+    E -- StateFlow --> F[UI Compose]
+    
+    F -- Eventos --> E
+    E -- Suspend Functions --> C
+    C -- Sincronización --> B
+```
+
+## 🛠️ 2. Componentes Implementados (Miguel)
+
+*   **Retrofit + Kotlin Serialization:** Configuración de un cliente HTTP robusto con interceptores de registro (Logging) y autenticación.
+*   **Gestión de Tokens:** Implementación de `TokenProvider` para el manejo seguro del encabezado `Authorization`.
+*   **Sincronización (Refresh):** Lógica en el repositorio para descargar datos remotos y actualizar la base de datos local mediante una estrategia de "reemplazo en conflicto".
+*   **Clasificación de Errores:** Manejo exhaustivo de excepciones de red (`IOException`, `HttpException` 401, 404, 500).
+
+## 📡 3. Contrato de API (Resumen)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/actividades` | Obtiene todas las actividades del servidor. |
+| `POST` | `/actividades` | Registra una nueva actividad de forma remota. |
+| `PATCH` | `/actividades/{id}` | Actualiza parcialmente una actividad. |
+| `DELETE` | `/actividades/{id}` | Elimina una actividad del servidor. |
