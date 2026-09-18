@@ -201,7 +201,7 @@ Son elementos externos o componentes de los que depende el funcionamiento del pr
 * **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
 * **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
 * **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
-Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
+  Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
 
 **Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
 
@@ -455,7 +455,7 @@ FormularioRoute es el dueño: ahí viven titulo y descripcion como rememberSavea
 
 Esta separación es la razón por la que FormularioActividad se puede probar y reutilizar sin depender de dónde vive el estado — igual que TarjetaActividad en la Semana 3 no sabía nada sobre ReglasActividad, solo recibía la actividad ya resuelta.
 
-### Punto 2 - Funcion validarTitulo y pruebas manuales 
+### Punto 2 - Funcion validarTitulo y pruebas manuales
 ![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
 
 ## 3.Persistencia ante recreación y Back Stack
@@ -465,9 +465,9 @@ Esta separación es la razón por la que FormularioActividad se puede probar y r
 * **Objetivo:** Verificar que el estado del formulario sobreviva a la recreación de la Activity provocada por la rotación de pantalla[cite: 2].
 * **Mecanismo:** Se implementó `rememberSaveable` en el composable del formulario (`FormularioRoute` / `FormularioActividad`) para variables de estado como `titulo` y `descripcion`[cite: 2].
 * **Procedimiento:**
-  1. Se inició la aplicación y se navegó hacia la pantalla de formulario (**CrearRoute**)[cite: 2].
-  2. Se ingresaron datos parciales en los campos (ej. *Título:* `"Avance proyecto CTMA"` y *Descripción:* `"Prueba de rotación..."`).
-  3. Se rotó la pantalla del dispositivo (de orientación Vertical a Horizontal).
+    1. Se inició la aplicación y se navegó hacia la pantalla de formulario (**CrearRoute**)[cite: 2].
+    2. Se ingresaron datos parciales en los campos (ej. *Título:* `"Avance proyecto CTMA"` y *Descripción:* `"Prueba de rotación..."`).
+    3. Se rotó la pantalla del dispositivo (de orientación Vertical a Horizontal).
 * **Resultado observado:** El estado de la UI no se reinició; el texto ingresado en los campos se **conservó intacto** gracias al mecanismo de `SavedInstanceState` que gestiona `rememberSaveable`[cite: 2].
 
 ---
@@ -477,28 +477,28 @@ Esta separación es la razón por la que FormularioActividad se puede probar y r
 A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchis**, el comportamiento de la pila de navegación (*Back Stack*) evoluciona de la siguiente manera[cite: 2]:
 
 1. **Acción 1: Abrir la aplicación**
-  * *Operación:* `StartDestination`
-  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+* *Operación:* `StartDestination`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
 
 2. **Acción 2: Navegar a la pantalla de Crear Actividad**
-  * *Operación:* `navController.navigate(CrearRoute)`
-  * *Back Stack:* `[ ListaRoute, CrearRoute ]`[cite: 2]
+* *Operación:* `navController.navigate(CrearRoute)`
+* *Back Stack:* `[ ListaRoute, CrearRoute ]`[cite: 2]
 
 3. **Acción 3: Guardar el borrador y volver**
-  * *Operación:* `navController.popBackStack()`
-  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
 
 4. **Acción 4: Seleccionar e ingresar al Detalle de la actividad (ID: 42)**
-  * *Operación:* `navController.navigate(DetalleRoute(id = "42"))`
-  * *Back Stack:* `[ ListaRoute, DetalleRoute("42") ]`[cite: 2]
+* *Operación:* `navController.navigate(DetalleRoute(id = "42"))`
+* *Back Stack:* `[ ListaRoute, DetalleRoute("42") ]`[cite: 2]
 
 5. **Acción 5: Presionar el botón Atrás**
-  * *Operación:* `navController.popBackStack()`
-  * *Back Stack:* `[ ListaRoute ]`[cite: 2]
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
 
 6. **Acción 6: Volver a presionar Atrás para salir / minimizar la app**
-  * *Operación:* `navController.popBackStack()`
-  * *Back Stack:* `[ ]`
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ]`
 
 ## 3.5 Laboratorio 3 y 3.6 Entregable integrado
 
@@ -580,6 +580,7 @@ Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewMode
 
 ---
 
+<<<<<<< semana-8-automatizacion
 # Semana 8 — Cierre de Sprint y Pruebas Avanzadas (Parte B)
 
 En esta fase final del sprint, se consolidó la infraestructura de pruebas y el aseguramiento de la calidad mediante pruebas unitarias, instrumentadas y métricas de cobertura.
@@ -629,3 +630,779 @@ Para verificar la integridad del proyecto, ejecute los siguientes comandos desde
 
 > [!TIP]
 > Tras ejecutar la cobertura, analice las ramas de `ReglasActividad.kt` para asegurar que las validaciones de título y progreso estén cubiertas al 100%.
+=======
+# Semana 8 — Networking y Sincronización (Offline-First)
+
+Se integró la capa de red para permitir la sincronización de actividades con un servidor remoto, manteniendo un enfoque "Offline-First" donde la base de datos local sigue siendo la fuente de verdad.
+
+## 🏗️ 1. Arquitectura Técnica de Red
+
+Se implementó el siguiente flujo de datos para la sincronización:
+
+```mermaid
+graph TD
+    A[Servidor API] -- Retrofit + OkHttp --> B[RemoteDataSource]
+    B -- DTOs --> C[Repository]
+    C -- Entidades --> D[(Room Database)]
+    D -- Flow --> E[ViewModel]
+    E -- StateFlow --> F[UI Compose]
+    
+    F -- Eventos --> E
+    E -- Suspend Functions --> C
+    C -- Sincronización --> B
+```
+
+## 🛠️ 2. Componentes Implementados (Miguel)
+
+*   **Retrofit + Kotlin Serialization:** Configuración de un cliente HTTP robusto con interceptores de registro (Logging) y autenticación.
+*   **Gestión de Tokens:** Implementación de `TokenProvider` para el manejo seguro del encabezado `Authorization`.
+*   **Sincronización (Refresh):** Lógica en el repositorio para descargar datos remotos y actualizar la base de datos local mediante una estrategia de "reemplazo en conflicto".
+*   **Clasificación de Errores:** Manejo exhaustivo de excepciones de red (`IOException`, `HttpException` 401, 404, 500).
+
+## 📡 3. Contrato de API (Resumen)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/actividades` | Obtiene todas las actividades del servidor. |
+| `POST` | `/actividades` | Registra una nueva actividad de forma remota. |
+| `PATCH` | `/actividades/{id}` | Actualiza parcialmente una actividad. |
+| `DELETE` | `/actividades/{id}` | Elimina una actividad del servidor. |
+
+---
+
+# Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
+
+## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)
+
+| Escenario de Riesgo | Respuesta Técnica de la Aplicación | Experiencia del Usuario (UI) |
+| :--- | :--- | :--- |
+| **Timeout (Latencia alta)** | Detección vía `SocketTimeoutException`. Cancelación del `Job` tras tiempo límite. | Mensaje: "El servidor tardó demasiado...". Opción de Reintentar. |
+| **401 Unauthorized** | Captura de error 401 en DataSource. Invocación a `TokenProvider.clearToken()`. | Redirección automática a Login / Snackbar de sesión expirada. |
+| **Sin Internet (Offline)** | Captura de `IOException`. Recuperación inmediata de datos desde Room. | Notificación: "Modo offline: Datos locales". La lista sigue visible. |
+| **Servidor 500 (Fallo interno)** | Captura genérica de error de servidor. Registro en logs (Timber/Log). | Mensaje: "Error del servidor (500)". Bloqueo de escritura remota. |
+
+## 🧪 2. Reporte de Evidencias de Ejecución (Guía 8)
+
+Se han validado los 8 escenarios críticos de resiliencia y sincronización exigidos por la Guía 8:
+
+1.  **Carga inicial exitosa:** Sincronización completa al abrir la app. Los datos remotos se guardan en Room.
+2.  **Modo offline (Vuelo):** Al desactivar red, la app muestra los datos cacheados sin errores fatales.
+3.  **Primer inicio sin red:** Si no hay caché ni red, se muestra pantalla de error total con botón Reintentar.
+4.  **Error 401 (Sesión expirada):** La app detecta el token inválido, lo limpia localmente y notifica al usuario.
+5.  **Timeout de conexión:** Tras 15 segundos sin respuesta, se informa al usuario del retraso del servidor.
+6.  **Cancelación de búsqueda:** Escrituras rápidas en el buscador cancelan peticiones de red obsoletas (**CA-08**).
+7.  **Reintento manual:** El botón "Reintentar" relanza la sincronización limpiando estados de error previos.
+8.  **Sincronización en segundo plano:** Las operaciones CRUD locales se confirman visualmente mientras se sincronizan.
+
+---
+
+# Verificación Técnica Final
+
+*   **Tests Unitarios:** 31 tests ejecutados (100% aprobados).
+*   **Cobertura de Resiliencia:** Manejo explícito de `CancellationException` para evitar falsos positivos en UI.
+*   **Accesibilidad:** Soporte para `LiveRegion` en estados de error y carga.
+>>>>>>> main
+# Planteamiento del problema
+
+Actualmente, los aprendices administran sus actividades académicas, enlaces de acceso, evidencias y fechas de entrega utilizando diferentes canales y herramientas, como aplicaciones de mensajería, correos electrónicos y notas personales. Esta dispersión de la información ocasiona olvidos, pérdida de evidencias, duplicación de tareas y dificultades para realizar un seguimiento adecuado del proceso formativo. Asimismo, los instructores enfrentan limitaciones para comunicar actividades y criterios de evaluación de manera organizada, afectando la trazabilidad del aprendizaje. Desde el punto de vista del desarrollo, resulta necesario contar con una base técnica sólida que permita evolucionar la aplicación sin comprometer su estabilidad. Por ello, surge la necesidad de desarrollar **Mi Formación CTMA**, una aplicación Android que centralice la gestión académica y facilite la organización, la comunicación y el seguimiento del proceso formativo.
+
+---
+
+# Tipos de usuario y necesidades
+
+| Tipo de usuario | Necesidad                                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Aprendiz**    | Consultar actividades, fechas de entrega, enlaces y registrar el avance de sus evidencias desde un solo lugar, para organizar mejor su proceso de formación y reducir olvidos.                                            |
+| **Instructor**  | Publicar actividades, compartir recursos, establecer criterios de evaluación y realizar seguimiento al progreso de los aprendices, garantizando una comunicación clara y una adecuada trazabilidad del proceso formativo. |
+
+---
+
+### Criterios de aceptacion por historia
+## Historias de usuario
+
+### Historia de usuario 1 — Consultar actividades
+
+HU-01 - Consultar actividades
+
+Como aprendiz,
+quiero consultar mis actividades registradas,
+para conocer la información y los recursos asociados a cada una.
+
+Criterios de aceptación
+
+CA-01.1
+Al acceder a la pantalla principal se muestran las actividades registradas.
+
+CA-01.2
+Cada actividad muestra como mínimo título, descripción y fecha de entrega.
+
+CA-01.3
+Si la actividad contiene un enlace, se puede acceder a él.
+
+CA-01.4
+Si se navega a un id de actividad que no existe, se muestra un estado recuperable en vez de un cierre inesperado.
+
+Riesgos relacionados
+- R-02
+- R-08
+
+Casos de prueba relacionados
+- TC-01
+- TC-02
+- TC-03
+- TC-21
+- TC-22
+---
+
+### Historia de usuario 2 — Registrar avance
+
+HU-02 - Registrar avance
+
+Como aprendiz,
+quiero actualizar el estado de mis actividades,
+para llevar un seguimiento de mi progreso.
+
+Criterios de aceptación
+
+CA-02.1
+Al cambiar el progreso de una actividad, la aplicación guarda y muestra el nuevo estado calculado.
+
+CA-02.2
+Al alcanzar progreso 100, la actividad se marca y se guarda como "Completada".
+
+CA-02.3
+Al volver a consultar una actividad modificada, se muestra el último estado guardado.
+
+CA-02.4
+Si el progreso es 0 y los días restantes son negativos, el estado calculado debe reflejar que la actividad está vencida.
+
+Riesgos relacionados
+- R-01
+- R-04
+- R-05
+
+Casos de prueba relacionados
+- TC-04
+- TC-05
+- TC-06
+- TC-07
+- TC-08
+---
+
+### Historia de usuario 3 — Publicar actividades
+
+HU-03 - Publicar actividades
+
+Como instructor,
+quiero registrar y publicar actividades,
+para que los aprendices puedan consultar la información y los recursos correspondientes.
+
+Criterios de aceptación
+
+CA-03.1
+Una actividad solo se almacena si tiene título válido (mínimo 3, máximo 80 caracteres) y días restantes no negativos.
+
+CA-03.2
+Los recursos o criterios de evaluación agregados quedan asociados a la actividad.
+
+CA-03.3
+Una actividad publicada es visible cuando el aprendiz consulta sus actividades.
+
+Riesgos relacionados
+- R-02
+- R-03
+
+Casos de prueba relacionados
+- TC-09
+- TC-10
+- TC-11
+- TC-12
+- TC-13
+- TC-14
+---
+
+### Historia de usuario 4 — Iniciar Sesion
+
+HU-04 - Iniciar sesión
+
+Como aprendiz o instructor,
+quiero iniciar sesión con mis credenciales,
+para acceder a las actividades y funciones correspondientes a mi rol.
+
+Criterios de aceptación
+
+CA-04.1
+Con credenciales válidas, el sistema da acceso a la pantalla principal según el rol del usuario.
+
+CA-04.2
+Con credenciales inválidas, el sistema muestra un mensaje de error y no permite el acceso.
+
+Riesgos relacionados
+- R-06
+
+Casos de prueba relacionados
+- TC-15
+- TC-16
+- TC-23
+- TC-24
+---
+### Historia de usuario 5 — Buscar actividad por título
+
+HU-05 - Buscar actividad por título
+
+Como aprendiz,
+quiero buscar una actividad escribiendo parte de su título,
+para encontrarla rápidamente sin desplazarme por toda la lista.
+
+Criterios de aceptación
+
+CA-05.1
+Al escribir un texto parcial, se muestran solo las actividades cuyo título lo contiene.
+
+CA-05.2
+Si ninguna actividad coincide con el texto buscado, se muestra un estado vacío de "sin resultados".
+
+Riesgos relacionados
+- R-07
+
+Casos de prueba relacionados
+- TC-17
+- TC-18
+---
+### Historia de usuario 6 — Ver actividades urgentes
+
+HU-06 - Ver actividades urgentes
+
+Como aprendiz,
+quiero identificar cuáles de mis actividades son urgentes,
+para priorizar mi tiempo antes de que venzan.
+
+Criterios de aceptación
+
+CA-06.1
+Una actividad con progreso menor a 100 y máximo 3 días restantes se marca como urgente.
+
+CA-06.2
+Una actividad completada no se marca como urgente sin importar los días restantes.
+
+Riesgos relacionados
+(ninguno registrado todavía en RIESGOS.md)
+
+Casos de prueba relacionados
+- TC-19
+- TC-20
+### Criterios no funcional medible
+
+### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## Dependencias y elementos externos
+
+Son elementos externos o componentes de los que depende el funcionamiento del proyecto.
+
+* **Android Studio:** para el desarrollo y ejecución de la aplicación.
+* **Kotlin y Android SDK:** para la construcción de la aplicación Android.
+* **Base de datos:** para almacenar usuarios, actividades, recursos, estados y criterios de evaluación.
+* **Conexión a Internet:** para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
+* **Servicio de autenticación:** para diferenciar los permisos de aprendices e instructores, si se implementa autenticación mediante un servicio externo.
+* **Navegador o aplicación compatible:** para abrir los enlaces externos asociados a las actividades.
+  Se recomienda incluir uno que sea fácil de demostrar y medir durante el proyecto:
+
+**Rendimiento:** El 95 % de las operaciones principales de consulta y actualización de actividades deberán mostrar una respuesta en un tiempo máximo de **2 segundos**, bajo condiciones normales de funcionamiento y una conexión de red estable.
+
+Este criterio es adecuado para el README porque no se queda en algo ambiguo como "la aplicación debe ser rápida".
+
+También podrían agregarse posteriormente otros criterios, como disponibilidad, seguridad o usabilidad, pero con uno medible ya se cumple el requisito.
+
+### Identificacion de dependencias, supuestos y preguntas abiertas
+
+## 3. Dependencias
+
+Son elementos externos o componentes de los que depende el funcionamiento del proyecto.
+
+* **Android Studio:** para el desarrollo, compilación y ejecución de la aplicación.
+* **Kotlin y Android SDK:** para la construcción y funcionamiento de la aplicación Android.
+* **Base de datos:** para almacenar información relacionada con usuarios, actividades, recursos, estados y criterios de evaluación.
+* **Conexión a Internet:** necesaria para acceder a recursos externos y sincronizar información, dependiendo de la arquitectura definida.
+* **Servicio de autenticación:** utilizado para diferenciar los permisos de aprendices e instructores, en caso de implementar autenticación mediante un servicio externo.
+* **Navegador o aplicación compatible:** necesario para abrir los enlaces externos asociados a las actividades.
+
+## 4. Supuestos
+
+Los supuestos son condiciones que se consideran ciertas para poder desarrollar el proyecto.
+
+* Se asume que los usuarios tendrán un dispositivo Android compatible con la versión mínima definida para la aplicación.
+* Se asume que cada usuario tendrá un tipo de rol definido: **aprendiz** o **instructor**.
+* Se asume que los instructores serán responsables de registrar información correcta sobre las actividades, fechas y criterios de evaluación.
+* Se asume que los aprendices tendrán acceso a las actividades correspondientes a su proceso formativo.
+* Se asume que el usuario tendrá conexión a Internet para las funcionalidades que requieran sincronización con el servidor.
+* Se asume que los enlaces y recursos publicados por los instructores serán accesibles y válidos.
+
+## 5. Preguntas abiertas
+
+Estas son decisiones que todavía deberían definirse durante el desarrollo del proyecto.
+
+1. ¿Qué versión mínima de Android será compatible con la aplicación?
+2. ¿La aplicación funcionará parcialmente sin conexión a Internet?
+3. ¿Qué tecnología se utilizará para el backend y la base de datos?
+4. ¿Cómo se realizará el inicio de sesión y la autenticación de los usuarios?
+5. ¿Cómo se asignarán los aprendices a sus respectivos instructores o grupos de formación?
+6. ¿Los aprendices podrán adjuntar archivos o evidencias directamente desde la aplicación?
+7. ¿Se implementarán notificaciones para recordar fechas próximas de entrega?
+8. ¿Los instructores podrán modificar o eliminar actividades después de publicarlas?
+9. ¿Qué formatos y tamaño máximo tendrán las evidencias que puedan subir los aprendices?
+
+# Taller 2 — Plan de pruebas v1 (Mi Formación CTMA)
+
+## Resumen de responsabilidades por integrante
+
+| Integrante     | Secciones | Enfoque de su parte |
+|----------------|---|---|
+| Miguel Angel O | 1, 2 y 3 | Identificación, objetivo y alcance incluido |
+| Juan Daniel P  | 4 y 5 | Fuera de alcance y base de prueba |
+| Juan Jose G    | 6, 7, 8 y 9 | Riesgos, enfoque, ambiente/datos y roles |
+| Juan Goez      | 10, 11 y 12 | Criterios de entrada/salida, entregables y cronograma |
+
+### 1. Identificación
+
+**Producto:** Mi Formación CTMA. **Documento:** Plan de pruebas v1 (borrador). **Responsable de esta versión:** equipo de pruebas (4 integrantes). **Fecha de elaboración:** 19 de agosto de 2026.
+
+### 2. Objetivo
+
+Las pruebas de esta iteración deben soportar la decisión de si el flujo de consulta de actividades (HU-CTMA-01), registro de avance (HU-CTMA-02) y publicación de actividades por el instructor (HU-CTMA-03) cumple los criterios de aceptación definidos en el README del proyecto, incluyendo las reglas de validación codificadas en `ReglasActividad.kt`, antes de considerar estable este incremento de la app.
+
+### 3. Alcance incluido
+
+Se valida la consulta de actividades, el registro y actualización del estado de avance, la publicación de actividades por el instructor, y las reglas de negocio de `validarActividad`, `estadoActividad`, `actividadesUrgentes` y `promedioProgreso`, ejecutadas en el emulador de Android Studio y, si está disponible, en un dispositivo Android físico.
+
+### 4. Fuera de alcance
+
+Quedan excluidas la autenticación real contra un servicio externo, la sincronización con un backend real, las notificaciones de fechas próximas y la carga de archivos como evidencia — todas siguen siendo preguntas abiertas sin resolver en el README, por lo que no pueden probarse todavía.
+
+### 5. Base de prueba
+
+Las tres historias de usuario del README (Consultar actividades, Registrar avance, Publicar actividades) con sus criterios Given-When-Then, el código de `ReglasActividad.kt`, y el criterio no funcional medible del README (95% de las operaciones de consulta/actualización responden en máximo 2 segundos).
+
+### 6. Riesgos
+
+| Riesgo | Prob. | Impacto | Exposición | Prioridad |
+|---|---|---|---|---|
+| El estado de avance no persiste tras cambiarlo | 4 | 5 | 20 | Muy alta |
+| Una actividad publicada por el instructor no aparece para el aprendiz | 3 | 5 | 15 | Alta |
+| Se guarda una actividad con título vacío o progreso fuera de rango | 3 | 4 | 12 | Alta |
+| Cálculo incorrecto de actividades urgentes (`progreso < 100` y `diasRestantes <= 3`) | 2 | 3 | 6 | Media |
+| El enlace asociado a la actividad no abre correctamente | 2 | 2 | 4 | Baja |
+
+### 7. Enfoque
+
+Pruebas unitarias (JUnit) sobre las funciones puras de `ReglasActividad` sin necesidad de UI; pruebas de integración para confirmar que `TarjetaActividad` refleja el estado calculado; pruebas de sistema/UI en Compose para el flujo completo de consultar y actualizar una actividad; pruebas de aceptación con el instructor sobre el flujo de publicación; pruebas no funcionales sobre el tiempo de respuesta de 2 segundos.
+
+### 8. Ambiente y datos
+
+Android Studio con emulador (o dispositivo Android físico), conexión a internet estable, acceso al código y al README del proyecto. Datos de prueba: actividades ficticias que cubran título vacío, progreso en 0/50/100, y días restantes negativos/positivos; cuentas simuladas de rol aprendiz e instructor, ya que la autenticación real aún no está definida.
+
+### 9. Roles
+
+El equipo (4 integrantes) se distribuye el diseño y la redacción de este plan por secciones según la tabla de cierre. Cada integrante ejecuta los casos derivados de su sección y participa en la revisión cruzada antes de la entrega final.
+
+### 10. Criterios de entrada, suspensión, reanudación y salida
+
+| Categoría | Ejemplo |
+|---|---|
+| Entrada | Historias y criterios revisados; proyecto compila sin errores; emulador configurado; versión identificada. |
+| Suspensión | La app no compila; el emulador falla repetidamente; datos de prueba corruptos; más del 30% de casos bloqueados por la misma causa. |
+| Reanudación | Corrección aplicada; build exitoso; smoke test aprobado. |
+| Salida | 100% de casos críticos ejecutados; cero defectos críticos abiertos; riesgos residuales aceptados y comunicados. |
+
+### 11. Entregables
+
+Casos de prueba diseñados y ejecutados, evidencias de ejecución (capturas del emulador), registro de defectos encontrados, métricas de cobertura y avance, e informe breve de cierre para la revisión entre pares.
+
+### 12. Cronograma
+
+Dentro de los 90 minutos asignados: 20 minutos para consolidar la matriz de riesgos, 40 minutos para redactar las 12 secciones en paralelo, y 30 minutos para integrar y revisar antes de la revisión entre pares.
+
+---
+# Semana 3 — Diseño de casos de prueba y gestión de defectos (Mi Formación CTMA)
+
+## 0. Activación
+
+- **Criterios de partida:** HU-CTMA-03/CA1 (el instructor registra una actividad con título, descripción y fecha de entrega) y HU-CTMA-02/CA1-CA2 (el aprendiz cambia el estado a "En progreso" y luego a "Completada").
+- **Riesgo asociado:** se guarda una actividad con título vacío o progreso fuera de rango — probabilidad 3, impacto 4, exposición 12, prioridad Alta.
+- **Preguntas de diseño:**
+    1. ¿Qué pasa si el instructor intenta guardar una actividad con el título vacío o solo con espacios?
+    2. ¿Qué progreso mínimo y máximo son válidos, y qué ocurre justo en esos límites (0 y 100)?
+    3. ¿El estado "Completada" impide que el progreso se reduzca después, o el sistema lo permite sin advertencia?
+    4. ¿Qué ocurre si `diasRestantes` es negativo en una actividad que ya tiene progreso 100?
+- **Escenario que debería aprobarse:** título "Entrega final", progreso 50, `diasRestantes` 3 → se guarda y el estado calculado es "En proceso".
+- **Escenario que debería rechazarse:** título vacío → `validarActividad` devuelve el error correspondiente y la actividad no se guarda.
+
+## 1. Laboratorio 1 — 12 casos de prueba
+
+### Responsable: Miguel Angel O — HU-CTMA-03, validación de creación de actividad (partición y valores límite sobre título y `diasRestantes`)
+
+| ID | Referencia | Técnica | Tipo | Datos | Resultado esperado | Prioridad |
+|---|---|---|---|---|---|---|
+| CP-CTMA-01 | HU-CTMA-03/CA1 | Partición de equivalencia | Positiva | Título "Entrega final", diasRestantes=5 | Se guarda sin errores | Alta |
+| CP-CTMA-02 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "" (vacío) | Error: "El título es obligatorio." | Alta |
+| CP-CTMA-03 | HU-CTMA-03/CA1 | Valores límite | Negativa | diasRestantes = -1 | Error: "Los días restantes no pueden ser negativos." | Alta |
+| CP-CTMA-04 | HU-CTMA-03/CA1 | Valores límite | Positiva | diasRestantes = 0 (límite mínimo exacto) | Se guarda sin errores | Alta |
+| CP-CTMA-05 | HU-CTMA-03/CA1 | Partición de equivalencia | Positiva | Título válido, descripción = null | Se guarda correctamente (descripción es opcional) | Media |
+| CP-CTMA-06 | HU-CTMA-03/CA1 | Partición de equivalencia | Negativa | Título "   " (solo espacios) | Error: "El título es obligatorio." (`isBlank()` lo detecta) | Alta |
+
+--- 
+
+## 2. Laboratorio 2 — Tabla de decisión y transición de estados
+
+### Responsable: Laverde
+
+#### 1. Tabla de decisión
+Derivada directamente de la lógica real de `estadoActividad()`:
+
+| Condición | R1 | R2 | R3 | R4 |
+|---|---|---|---|---|
+| `progreso == 100` | Sí | No | No | No |
+| `progreso > 0` | – | Sí | No | No |
+| `diasRestantes < 0` | – | – | Sí | No |
+| **Estado resultante** | **Completada** | **En proceso** | **Vencida** | **Pendiente** |
+| **Caso derivado** | **CP-CTMA-10** | **CP-CTMA-09** | **CP-CTMA-13 (nuevo)** | **CP-CTMA-14 (nuevo)** |
+
+* **CP-CTMA-13:** `progreso = 0`, `diasRestantes = -2` → estado **"Vencida"**.
+* **CP-CTMA-14:** `progreso = 0`, `diasRestantes = 3` → estado **"Pendiente"**.
+
+#### 2. Modelo de transición de estados
+
+A diferencia de un sistema con estado persistente, aquí el estado se **calcula** a partir de `progreso` y `diasRestantes` — no hay un campo de estado guardado ni eventos que lo cambien directamente. Por eso las "transiciones" representan cambios válidos o inválidos en esos dos valores:
+
+| Transición (cambio de datos) | ¿Válida? | Caso |
+|---|---|---|
+| Pendiente → En proceso (progreso pasa de 0 a >0) | Sí | CP-CTMA-09 |
+| En proceso → Completada (progreso pasa a 100) | Sí | CP-CTMA-10 |
+| Pendiente/En proceso → Vencida (diasRestantes baja de 0) | Sí | CP-CTMA-13 |
+| Completada → progreso se reduce (ej. de 100 a 40) | **No debería permitirse, pero el código no lo bloquea** | CP-CTMA-15 (nuevo) |
+| Completada con diasRestantes vuelto negativo | **El estado sigue mostrando "Completada" y oculta el atraso** | CP-CTMA-16 (nuevo) |
+
+Las últimas dos son las "transiciones inválidas" que pide la guía — pero en este caso no son errores de código que rechacen la acción, sino **huecos de validación reales** que encontramos al revisar `ReglasActividad.kt`: no existe ninguna regla que impida bajar el progreso de una actividad completada, ni que avise si sus días restantes se volvieron negativos después de completarla.
+
+#### 3. Caso de uso: Registrar avance de una actividad
+
+- **Actor principal:** Aprendiz autenticado.
+- **Flujo principal:** Abre actividad → selecciona "En progreso" → progreso se actualiza y se guarda → luego selecciona "Completada" → progreso pasa a 100 → estado se recalcula.
+- **Alterno A:** El aprendiz cierra la app antes de guardar → al reabrir, debe conservar el último estado guardado (HU-CTMA-02/CA3).
+- **Excepción B:** Se intenta fijar un progreso fuera de 0–100 → `validarActividad` rechaza el cambio.
+- **Excepción C:** Se intenta actualizar una actividad que el instructor ya eliminó → debería informarse que ya no está disponible (pregunta abierta del README, aún sin definir).
+
+* Con base en la revisión que hicimos del código de ReglasActividad.kt, es muy probable que CP-CTMA-15 y CP-CTMA-16 fallen al ejecutarlos (porque confirmamos que no existe la validación correspondiente), mientras que el resto de los casos —título vacío, rangos de progreso, días restantes negativos— deberían pasar, ya que sí están correctamente implementados. Aun así, hay que ejecutarlos todos para confirmarlo, no asumirlo.
+
+*Reporte de defecto completo (a partir de CP-CTMA-15):*
+
+| Campo | Contenido |
+|---|---|
+| ID | BUG-CTMA-01 |
+| Título | El sistema permite reducir el progreso de una actividad ya "Completada" sin advertencia |
+| Ambiente | Emulador Android Studio, build actual de Mi Formación CTMA |
+| Referencia | HU-CTMA-02 / CP-CTMA-15 |
+| Precondición | Actividad con progreso=100 (estado "Completada") ya guardada |
+| Pasos | 1) Abrir la actividad completada. 2) Cambiar su progreso a 40. 3) Guardar. |
+| Resultado esperado | El sistema debería impedir o advertir sobre la reducción de progreso de una actividad completada (regla de negocio a definir) |
+| Resultado real | validarActividad solo verifica que progreso esté entre 0 y 100; no hay regla que impida que un valor ya completado disminuya |
+| Severidad / Prioridad | Media / P3 (brecha de regla de negocio no definida, no es pérdida de datos ni de seguridad) |
+| Evidencia | Captura del progreso antes (100%) y después (40%) del cambio |
+| Estado inicial | Nuevo |
+
+## 4. Matriz de trazabilidad actualizada
+
+| Historia | Criterio | Riesgo | Casos | Prioridad | Resultado | Defecto |
+|---|---|---|---|---|---|---|
+| HU-CTMA-03 | CA1 Título obligatorio | Actividad guardada sin título válido | CP-CTMA-01, 02, 05, 06 | Alta | Diseñado | — |
+| HU-CTMA-03 | CA1 Días restantes válidos | Días restantes negativos aceptados | CP-CTMA-03, 04 | Alta | Diseñado | — |
+| HU-CTMA-02 | CA1/CA2 Progreso y estado | Cálculo de estado incorrecto | CP-CTMA-07 a 11, 13, 14 | Muy alta | Diseñado | — |
+| HU-CTMA-02 | CA2 Marcar completada | Regresión de progreso no bloqueada | CP-CTMA-15 | Media | Ejecutado: falla (a confirmar) | BUG-CTMA-01 |
+| HU-CTMA-02 | CA3 Persistencia de estado | Días restantes negativos ocultos tras completar | CP-CTMA-16 | Media | Pendiente de ejecución | — |
+
+### Responsable: Juan Goez
+
+* Con base en la revisión que hicimos del código de ReglasActividad.kt, es muy probable que CP-CTMA-15 y CP-CTMA-16 fallen al ejecutarlos (porque confirmamos que no existe la validación correspondiente), mientras que el resto de los casos —título vacío, rangos de progreso, días restantes negativos— deberían pasar, ya que sí están correctamente implementados. Aun así, hay que ejecutarlos todos para confirmarlo, no asumirlo.
+
+*Reporte de defecto completo (a partir de CP-CTMA-15):*
+
+| Campo | Contenido |
+|---|---|
+| ID | BUG-CTMA-01 |
+| Título | El sistema permite reducir el progreso de una actividad ya "Completada" sin advertencia |
+| Ambiente | Emulador Android Studio, build actual de Mi Formación CTMA |
+| Referencia | HU-CTMA-02 / CP-CTMA-15 |
+| Precondición | Actividad con progreso=100 (estado "Completada") ya guardada |
+| Pasos | 1) Abrir la actividad completada. 2) Cambiar su progreso a 40. 3) Guardar. |
+| Resultado esperado | El sistema debería impedir o advertir sobre la reducción de progreso de una actividad completada (regla de negocio a definir) |
+| Resultado real | validarActividad solo verifica que progreso esté entre 0 y 100; no hay regla que impida que un valor ya completado disminuya |
+| Severidad / Prioridad | Media / P3 (brecha de regla de negocio no definida, no es pérdida de datos ni de seguridad) |
+| Evidencia | Captura del progreso antes (100%) y después (40%) del cambio |
+| Estado inicial | Nuevo |
+
+## 4. Matriz de trazabilidad actualizada
+
+| Historia | Criterio | Riesgo | Casos | Prioridad | Resultado | Defecto |
+|---|---|---|---|---|---|---|
+| HU-CTMA-03 | CA1 Título obligatorio | Actividad guardada sin título válido | CP-CTMA-01, 02, 05, 06 | Alta | Diseñado | — |
+| HU-CTMA-03 | CA1 Días restantes válidos | Días restantes negativos aceptados | CP-CTMA-03, 04 | Alta | Diseñado | — |
+| HU-CTMA-02 | CA1/CA2 Progreso y estado | Cálculo de estado incorrecto | CP-CTMA-07 a 11, 13, 14 | Muy alta | Diseñado | — |
+| HU-CTMA-02 | CA2 Marcar completada | Regresión de progreso no bloqueada | CP-CTMA-15 | Media | Ejecutado: falla (a confirmar) | BUG-CTMA-01 |
+| HU-CTMA-02 | CA3 Persistencia de estado | Días restantes negativos ocultos tras completar | CP-CTMA-16 | Media | Pendiente de ejecución | — |
+
+# Semana 4: Estado, formularios y navegación
+
+![diagrama quien posea el estado del formulario](diagrama1.png)
+
+### Punto 1 — ¿Quién posee el estado?
+
+FormularioRoute es el dueño: ahí viven titulo y descripcion como rememberSaveable, porque son datos de interfaz pequeños que deben sobrevivir a una rotación pero no a un cierre de la app. FormularioActividad es stateless — no guarda nada, solo recibe value y comunica intención hacia arriba mediante onTituloChange, onDescripcionChange y onGuardarClick. Esto es justo el "flujo unidireccional" del punto 3 de la guía: el estado baja, los eventos suben, y nunca al revés.
+
+Esta separación es la razón por la que FormularioActividad se puede probar y reutilizar sin depender de dónde vive el estado — igual que TarjetaActividad en la Semana 3 no sabía nada sobre ReglasActividad, solo recibía la actividad ya resuelta.
+
+### Punto 2 - Funcion validarTitulo y pruebas manuales
+![Vista de pruebas manuales de la funcion ValidarTitulo](PruebasManualesValidarTitulo.png)
+
+## 3.Persistencia ante recreación y Back Stack
+
+#### Punto 5: Prueba de rotación con borrador (`rememberSaveable`)
+
+* **Objetivo:** Verificar que el estado del formulario sobreviva a la recreación de la Activity provocada por la rotación de pantalla[cite: 2].
+* **Mecanismo:** Se implementó `rememberSaveable` en el composable del formulario (`FormularioRoute` / `FormularioActividad`) para variables de estado como `titulo` y `descripcion`[cite: 2].
+* **Procedimiento:**
+    1. Se inició la aplicación y se navegó hacia la pantalla de formulario (**CrearRoute**)[cite: 2].
+    2. Se ingresaron datos parciales en los campos (ej. *Título:* `"Avance proyecto CTMA"` y *Descripción:* `"Prueba de rotación..."`).
+    3. Se rotó la pantalla del dispositivo (de orientación Vertical a Horizontal).
+* **Resultado observado:** El estado de la UI no se reinició; el texto ingresado en los campos se **conservó intacto** gracias al mecanismo de `SavedInstanceState` que gestiona `rememberSaveable`[cite: 2].
+
+---
+
+#### Punto 6: Dibujo del Back Stack (6 acciones definidas por Arrunchis)
+
+A partir de la secuencia de 6 acciones de navegación coordinadas con **Arrunchis**, el comportamiento de la pila de navegación (*Back Stack*) evoluciona de la siguiente manera[cite: 2]:
+
+1. **Acción 1: Abrir la aplicación**
+* *Operación:* `StartDestination`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+2. **Acción 2: Navegar a la pantalla de Crear Actividad**
+* *Operación:* `navController.navigate(CrearRoute)`
+* *Back Stack:* `[ ListaRoute, CrearRoute ]`[cite: 2]
+
+3. **Acción 3: Guardar el borrador y volver**
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+4. **Acción 4: Seleccionar e ingresar al Detalle de la actividad (ID: 42)**
+* *Operación:* `navController.navigate(DetalleRoute(id = "42"))`
+* *Back Stack:* `[ ListaRoute, DetalleRoute("42") ]`[cite: 2]
+
+5. **Acción 5: Presionar el botón Atrás**
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ListaRoute ]`[cite: 2]
+
+6. **Acción 6: Volver a presionar Atrás para salir / minimizar la app**
+* *Operación:* `navController.popBackStack()`
+* *Back Stack:* `[ ]`
+
+## 3.5 Laboratorio 3 y 3.6 Entregable integrado
+
+### Suite de Humo (Smoke Tests)
+| ID | Endpoint | Propósito | Resultado Esperado |
+| :--- | :--- | :--- | :--- |
+| **ST-01** | `POST /auth/login` | Probar inicio de sesión | Devuelve `200 OK` y el token JWT |
+| **ST-02** | `GET /todos` | Consultar la lista de tareas | Devuelve `200 OK` y la lista de tareas |
+| **ST-03** | `GET /todos/1` | Consultar una tarea válida | Devuelve `200 OK` con los datos del ID 1 |
+| **ST-04** | `POST /todos/add` | Enviar una nueva tarea | Devuelve `201 Created` o `200 OK` con el nuevo ID |
+
+### Charter de Sesión Exploratoria
+* **Misión:** Probar la estabilidad de la API enviando datos incorrectos o mal formateados.
+* **Alcance:** Endpoints de `/auth` y `/todos`.
+* **Tiempo (Time-box):** 45 minutos.
+* **Datos de prueba:** Contraseñas erróneas, IDs inexistentes (`9999`) y formatos incompatibles.
+* **Riesgos:** Asumir persistencia real tras peticiones de escritura y exposición de tokens JWT.
+
+### Matriz de Trazabilidad Actualizada
+| ID Caso | Descripción | Tipo | Método / Endpoint | Resultado Esperado | Ejecución | Resultado Real | Evidencia | Defecto |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **TC-01** | Autenticación válida | Positivo | `POST /auth/login` | Status `200 OK`, entrega token JWT | Éxito | Token recibido | Captura Postman | N/A |
+| **TC-02** | Autenticación fallida | Negativo | `POST /auth/login` | Status `400` / `401` | Éxito | Credenciales inválidas | Captura DevTools Network | N/A |
+| **TC-03** | Obtener actividades | Positivo | `GET /todos` | Status `200 OK`, lista de tareas | Éxito | Devuelve arreglo de tareas | Response JSON | N/A |
+| **TC-04** | Actividad inexistente | Negativo | `GET /todos/9999` | Status `404 Not Found` | Éxito | Tarea no encontrada | Status 404 Postman | N/A |
+| **TC-05** | Crear actividad | Positivo | `POST /todos/add` | Status `201`/`200`, ID asignado | Éxito | Objeto simulado devuelto | Response Body | N/A |
+| **TC-06** | Cambiar estado | Transición | `PUT /todos/1` | Status `200 OK`, `completed: true` | Éxito | Estado actualizado en respuesta | Payload & Response | N/A |
+
+### 3.6 Bitácora Técnica de Observación
+> **Aviso de Persistencia en Entorno DummyJSON:**  
+> Se deja constancia explícita en la bitácora de que **DummyJSON** opera únicamente como un entorno *mock / REST API* simulado[cite: 1]. Si bien procesa peticiones HTTP (`GET`, `POST`, `PUT`, `DELETE`) respondiendo con códigos de estado estandarizados[cite: 1], **sus operaciones de escritura no persisten modificaciones en la base de datos real del servidor**[cite: 1]. Cualquier recurso creado o editado devuelve una respuesta simulada en el acto, por lo que consultas subsecuentes a dicho recurso reflejarán únicamente los datos por defecto del servidor[cite: 1].
+
+---
+
+# Semana 6 — Migración de Base de Datos y UI Reactiva (Room v2)
+
+En esta etapa se completó la integración total de la capa de datos con la interfaz de usuario, se implementó la primera migración de esquema y se añadieron capacidades de búsqueda avanzada.
+
+## 🏗️ 1. Migración de Room (Versión 1 ➔ 2)
+
+Se actualizó la estructura de la base de datos local para incluir el campo `resuelto`, permitiendo marcar actividades como finalizadas independientemente de su progreso.
+
+*   **Campo añadido:** `resuelto` (Boolean / INTEGER en SQLite).
+*   **Script de Migración:** `ALTER TABLE actividades ADD COLUMN resuelto INTEGER NOT NULL DEFAULT 0`
+
+## 🔍 2. Búsqueda y Filtrado Reactivo
+
+La interfaz de usuario ofrece una experiencia de filtrado en tiempo real sin necesidad de recargas manuales, utilizando consultas SQL directas al DAO.
+
+---
+
+# Semana 7 — Corrutinas, Flujos y Estados de UI
+
+En esta etapa se evolucionó la arquitectura hacia un modelo 100% reactivo y resiliente, integrando Corrutinas de Kotlin y flujos de datos avanzados.
+
+## ⚡ 1. Flujo de Datos Reactivo (Flow & StateFlow)
+
+Se implementó una tubería de datos que conecta Room directamente con la interfaz de usuario:
+*   **Repositorios:** Exponen `Flow<List<ActividadFormativa>>` asegurando actualizaciones en tiempo real.
+*   **ViewModel:** Transforma los flujos fríos en `StateFlow` mediante el operador `stateIn` dentro del `viewModelScope`.
+*   **UI:** Consume los estados de forma segura con `collectAsStateWithLifecycle`, optimizando el uso de recursos y batería.
+
+## 🔄 2. Gestión de Estados (UiState)
+
+La aplicación ahora es consciente de su estado interno en todo momento:
+*   **ListadoUiState:** Maneja los estados `Cargando`, `Contenido`, `Vacio` y `Error`.
+*   **OperacionUiState:** Controla el ciclo de vida de inserciones, ediciones y eliminaciones (`Inactiva`, `EnCurso`, `Exitosa`, `Fallida`).
+
+## 🔍 3. Búsqueda Optimizada y Cancelable
+
+Se implementó una búsqueda reactiva que utiliza el operador `flatMapLatest`. Esto garantiza que si el usuario escribe rápidamente, las consultas anteriores a la base de datos se cancelan automáticamente, procesando solo el término final.
+
+## 🧪 4. Pruebas de Corrutinas (runTest)
+
+Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewModelTest`) utilizando:
+*   `StandardTestDispatcher` y `UnconfinedTestDispatcher` para controlar el tiempo virtual.
+*   `runTest` para validar emisiones de flujos y transiciones de estado.
+*   Mocks de repositorios para aislar la lógica del ViewModel.
+
+---
+
+
+# Semana 8 — Cierre de Sprint y Pruebas Avanzadas (Parte B)
+
+En esta fase final del sprint, se consolidó la infraestructura de pruebas y el aseguramiento de la calidad mediante pruebas unitarias, instrumentadas y métricas de cobertura.
+
+## 🛠️ 1. Pruebas de Integración y Mocks
+
+### ¿Por qué Room no se debe Mockear?
+> [!IMPORTANT]
+> **Pregunta de Certificación Técnica:** ¿Qué dependencia NO se debería mockear en una prueba de integración real y por qué?
+>
+> **Respuesta:** La base de datos (Room) **NO** debe mockearse en pruebas de integración reales. Room es un componente de infraestructura complejo cuyas interacciones con SQLite, triggers y restricciones de integridad son difíciles de replicar fielmente con un mock. Mockear Room oculta errores potenciales en consultas SQL, fallos en migraciones o problemas de concurrencia. En su lugar, se debe utilizar `Room.inMemoryDatabaseBuilder`, que ejecuta una base de datos real en la memoria RAM, garantizando fidelidad total sin ensuciar el almacenamiento del dispositivo.
+
+## 📋 2. Artefactos Scrum - Sprint Final
+
+### Sprint Backlog (Cierre)
+- [x] T1. Implementación de MockK y limpieza de Mockito.
+- [x] T2. Cobertura de casos de prueba del ViewModel (Éxito, Evidencia ausente, Transición inválida).
+- [x] T3. Pruebas instrumentadas de persistencia Room (DAO).
+- [x] T4. Implementación de regla de negocio `validarTransicion` en `ReglasActividad`.
+- [x] T5. Configuración de JaCoCo para reportes de cobertura.
+- [x] T6. Documentación final y actualización de README.
+
+### Definition of Done (DoD)
+- [x] Código compilando sin errores ni advertencias críticas.
+- [x] Pruebas unitarias al 100% de éxito (JUnit + MockK).
+- [x] Pruebas instrumentadas superadas en emulador/dispositivo (Room).
+- [x] Reporte de cobertura generado y analizado (JaCoCo).
+- [x] Credenciales y secretos eliminados del código fuente.
+- [x] Documentación de APIs y métodos actualizada (KDoc).
+
+### Resumen de Eventos Scrum
+*   **Daily Scrum (Simulado):** "Ayer terminé la migración de Mockito a MockK y los tests del ViewModel. Hoy configuré JaCoCo y las pruebas instrumentadas de Room. No tengo bloqueos."
+*   **Retrospectiva:**
+    *   **Conservar:** El uso de `inMemoryDatabaseBuilder` para tests rápidos y fiables.
+    *   **Eliminar:** La duplicidad de lógica en el ViewModel (ahora centralizada en `ReglasActividad`).
+    *   **Mejorar:** La cobertura de los casos de borde en las transiciones de estado de la UI.
+
+## 🚀 3. Guía de Ejecución Técnica
+
+Para verificar la integridad del proyecto, ejecute los siguientes comandos desde la terminal:
+
+| Acción | Comando | Path de Reporte |
+| :--- | :--- | :--- |
+| **Pruebas Unitarias** | `./gradlew test` | `app/build/reports/tests/testDebugUnitTest/index.html` |
+| **Pruebas Room (Instrumentadas)** | `./gradlew connectedAndroidTest` | `app/build/reports/androidTests/connected/index.html` |
+| **Cobertura de Código** | `./gradlew jacocoTestReport` | `app/build/reports/jacoco/jacocoTestReport/html/index.html` |
+
+> [!TIP]
+> Tras ejecutar la cobertura, analice las ramas de `ReglasActividad.kt` para asegurar que las validaciones de título y progreso estén cubiertas al 100%.
+
+# Semana 8 — Networking y Sincronización (Offline-First)
+
+Se integró la capa de red para permitir la sincronización de actividades con un servidor remoto, manteniendo un enfoque "Offline-First" donde la base de datos local sigue siendo la fuente de verdad.
+
+## 🏗️ 1. Arquitectura Técnica de Red
+
+Se implementó el siguiente flujo de datos para la sincronización:
+
+```mermaid
+graph TD
+    A[Servidor API] -- Retrofit + OkHttp --> B[RemoteDataSource]
+    B -- DTOs --> C[Repository]
+    C -- Entidades --> D[(Room Database)]
+    D -- Flow --> E[ViewModel]
+    E -- StateFlow --> F[UI Compose]
+    
+    F -- Eventos --> E
+    E -- Suspend Functions --> C
+    C -- Sincronización --> B
+```
+
+## 🛠️ 2. Componentes Implementados (Miguel)
+
+*   **Retrofit + Kotlin Serialization:** Configuración de un cliente HTTP robusto con interceptores de registro (Logging) y autenticación.
+*   **Gestión de Tokens:** Implementación de `TokenProvider` para el manejo seguro del encabezado `Authorization`.
+*   **Sincronización (Refresh):** Lógica en el repositorio para descargar datos remotos y actualizar la base de datos local mediante una estrategia de "reemplazo en conflicto".
+*   **Clasificación de Errores:** Manejo exhaustivo de excepciones de red (`IOException`, `HttpException` 401, 404, 500).
+
+## 📡 3. Contrato de API (Resumen)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/actividades` | Obtiene todas las actividades del servidor. |
+| `POST` | `/actividades` | Registra una nueva actividad de forma remota. |
+| `PATCH` | `/actividades/{id}` | Actualiza parcialmente una actividad. |
+| `DELETE` | `/actividades/{id}` | Elimina una actividad del servidor. |
+
+---
+
+# Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
+
+## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)
+
+| Escenario de Riesgo | Respuesta Técnica de la Aplicación | Experiencia del Usuario (UI) |
+| :--- | :--- | :--- |
+| **Timeout (Latencia alta)** | Detección vía `SocketTimeoutException`. Cancelación del `Job` tras tiempo límite. | Mensaje: "El servidor tardó demasiado...". Opción de Reintentar. |
+| **401 Unauthorized** | Captura de error 401 en DataSource. Invocación a `TokenProvider.clearToken()`. | Redirección automática a Login / Snackbar de sesión expirada. |
+| **Sin Internet (Offline)** | Captura de `IOException`. Recuperación inmediata de datos desde Room. | Notificación: "Modo offline: Datos locales". La lista sigue visible. |
+| **Servidor 500 (Fallo interno)** | Captura genérica de error de servidor. Registro en logs (Timber/Log). | Mensaje: "Error del servidor (500)". Bloqueo de escritura remota. |
+
+## 🧪 2. Reporte de Evidencias de Ejecución (Guía 8)
+
+Se han validado los 8 escenarios críticos de resiliencia y sincronización exigidos por la Guía 8:
+
+1.  **Carga inicial exitosa:** Sincronización completa al abrir la app. Los datos remotos se guardan en Room.
+2.  **Modo offline (Vuelo):** Al desactivar red, la app muestra los datos cacheados sin errores fatales.
+3.  **Primer inicio sin red:** Si no hay caché ni red, se muestra pantalla de error total con botón Reintentar.
+4.  **Error 401 (Sesión expirada):** La app detecta el token inválido, lo limpia localmente y notifica al usuario.
+5.  **Timeout de conexión:** Tras 15 segundos sin respuesta, se informa al usuario del retraso del servidor.
+6.  **Cancelación de búsqueda:** Escrituras rápidas en el buscador cancelan peticiones de red obsoletas (**CA-08**).
+7.  **Reintento manual:** El botón "Reintentar" relanza la sincronización limpiando estados de error previos.
+8.  **Sincronización en segundo plano:** Las operaciones CRUD locales se confirman visualmente mientras se sincronizan.
+
+---
+
+# Verificación Técnica Final
+
+*   **Tests Unitarios:** 31 tests ejecutados (100% aprobados).
+*   **Cobertura de Resiliencia:** Manejo explícito de `CancellationException` para evitar falsos positivos en UI.
+*   **Accesibilidad:** Soporte para `LiveRegion` en estados de error y carga.
+

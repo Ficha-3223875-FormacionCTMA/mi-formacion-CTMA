@@ -1,3 +1,4 @@
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroidSetup)
@@ -8,6 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.miformacionctma"
+
     compileSdk = 36
 
     defaultConfig {
@@ -81,6 +83,7 @@ kotlin {
 }
 
 dependencies {
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -101,7 +104,14 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Room
+    // Retrofit & Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+
+    // Room 3
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
 
@@ -109,6 +119,9 @@ dependencies {
     implementation(libs.androidx.sqlite)
     implementation(libs.androidx.sqlite.ktx)
     implementation(libs.androidx.sqlite.framework)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     // Pruebas unitarias
     testImplementation(libs.junit)
@@ -127,3 +140,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
