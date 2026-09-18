@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
@@ -128,6 +129,23 @@ class ActividadViewModel(
         viewModelScope.launch {
             _operacionState.value = OperacionUiState.EnCurso
             try {
+                // Validación de transición (Laboratorio 2)
+                val antigua = repository.obtenerPorId(actividad.id).firstOrNull()
+                if (antigua != null) {
+                    val errorTransicion = ReglasActividad.validarTransicion(antigua, actividad)
+                    if (errorTransicion != null) {
+                        _operacionState.value = OperacionUiState.Fallida(errorTransicion)
+                        return@launch
+                    }
+                }
+
+                // Validación de campos obligatorios (Evidencia ausente)
+                val errores = ReglasActividad.validarActividad(actividad)
+                if (errores.isNotEmpty()) {
+                    _operacionState.value = OperacionUiState.Fallida(errores.first())
+                    return@launch
+                }
+
                 repository.actualizar(actividad)
                 _operacionState.value = OperacionUiState.Exitosa
             } catch (e: Exception) {

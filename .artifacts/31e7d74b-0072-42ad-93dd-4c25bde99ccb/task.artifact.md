@@ -1,0 +1,4 @@
+- `[ ]` Limpiar `libs.versions.toml` (Consolidar versiones y librerías)
+- `[ ]` Limpiar `app/build.gradle.kts` (Eliminar duplicados y usar catálogo en tests)
+- `[ ]` Sincronizar Gradle
+- `[ ]` Ejecutar pruebas unitarias para verificar estabilidad

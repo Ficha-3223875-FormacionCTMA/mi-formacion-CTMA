@@ -1,4 +1,7 @@
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroidSetup)
@@ -9,6 +12,13 @@ plugins {
 
 android {
     namespace = "com.example.miformacionctma"
+
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+    val apiKey = properties.getProperty("API_KEY") ?: ""
 
     compileSdk = 36
 
@@ -21,17 +31,35 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api-dev.example.com/\"")
+        }
+        create("stage") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api-stage.example.com/\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\"")
         }
     }
 
@@ -42,6 +70,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -82,6 +111,13 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
+
     // Room 3
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
@@ -91,15 +127,15 @@ dependencies {
     implementation(libs.androidx.sqlite.ktx)
     implementation(libs.androidx.sqlite.framework)
 
-    // DataStore
-    implementation(libs.androidx.datastore.preferences)
-
     // Pruebas unitarias
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockwebserver)
 
     // Pruebas Android
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -111,15 +147,5 @@ dependencies {
     // Debug
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-
-    // Servicios web
-    implementation(libs.retrofit)
-    implementation(libs.retrofit.converter.kotlinx.serialization)
-    implementation(libs.okhttp)
-    implementation(libs.okhttp.logging.interceptor)
-    implementation(libs.kotlinx.serialization.json)
-
-    // Pruebas de servicios web
-    testImplementation(libs.mockwebserver)
 }
 
