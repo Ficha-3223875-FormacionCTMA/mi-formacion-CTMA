@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rutas internas expuestas por FileProvider para evidencias fotográficas. -->
+<paths>
+    <!-- Carpeta interna "evidencias": fotos capturadas con la cámara. -->
+    <external-files-path
+        name="evidencias"
+        path="evidencias/" />
+</paths>
