@@ -66,4 +66,15 @@ object ReglasActividad {
             it.titulo.contains(busqueda, ignoreCase = true)
         }
     }
+
+    /**
+     * Valida si la transición entre un estado antiguo y uno nuevo es permitida.
+     * CP-CTMA-TEST-TRANSICION: No se permite reducir el progreso si ya está al 100%.
+     */
+    fun validarTransicion(antigua: ActividadFormativa, nueva: ActividadFormativa): String? {
+        if (antigua.progreso == 100 && nueva.progreso < 100) {
+            return "No se puede reducir el progreso de una actividad completada."
+        }
+        return null
+    }
 }

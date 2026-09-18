@@ -16,6 +16,8 @@ lifecycleViewModelCompose = "2.8.7"
 kotlinxCoroutines = "1.9.0"
 mockito = "5.11.0"
 mockitoKotlin = "5.4.0"
+mockk = "1.14.11"
+junitJupiter = "5.10.2"
 
 # Room y SQLite
 room = "3.0.3"
@@ -90,6 +92,9 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
 
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
