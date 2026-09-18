@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
 
         // Configuración de la capa remota (Implementación de Miguel)
         val apiService = NetworkModule.retrofit.create(ActividadApiService::class.java)
-        val remoteDataSource = RemoteActividadDataSource(apiService)
+        val remoteDataSource = RemoteActividadDataSource(apiService, contentResolver)
 
         val repository = ActividadRepository(
             actividadDao = database.actividadDao(),

@@ -26,4 +26,7 @@ interface EvidenciaDao {
     
     @Query("SELECT * FROM evidencias WHERE estado = 'LOCAL' OR estado = 'FALLIDA'")
     suspend fun obtenerPendientesSincronizacion(): List<EvidenciaEntity>
+
+    @Query("UPDATE evidencias SET estado = :nuevoEstado WHERE id = :id")
+    suspend fun actualizarEstado(id: Long, nuevoEstado: String)
 }
