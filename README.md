@@ -619,6 +619,43 @@ graph TD
 
 ---
 
+# Semana 9 — Capacidades del Dispositivo y Seguridad
+
+Integración de funciones de hardware (Cámara y Galería) y reforzamiento de la seguridad de red y permisos.
+
+## 🏗️ 1. Modelo de Datos de Evidencias
+
+Se implementó la persistencia para adjuntos fotográficos relacionada con las actividades:
+
+*   **Tabla `evidencias`:** Almacena metadatos (URI, MIME, tamaño) y el estado de sincronización.
+*   **Relación:** `ActividadFormativa` (1) ➔ `Evidencia` (N).
+*   **Migración de Room (v2 ➔ v3):** Implementada para soportar el nuevo esquema sin pérdida de datos.
+
+## 🔄 2. Estados del Ciclo de Vida de la Evidencia
+
+| Estado | Descripción |
+| :--- | :--- |
+| `LOCAL` | Capturada o seleccionada, pendiente de envío. |
+| `SUBIENDO` | Transferencia activa al servidor. |
+| `SINCRONIZADA` | Confirmada por el backend. |
+| `FALLIDA` | Error de red o validación (reintentable). |
+
+## 🛡️ 3. Matriz de Riesgos y Controles (Consolidado)
+
+| Riesgo | Impacto | Control / Mitigación |
+| :--- | :--- | :--- |
+| Exposición de `file://` URIs | Alto | Uso estricto de `content://` mediante FileProvider. |
+| Filtrado de tokens en Logcat | Crítico | Desactivación de logs de red en variante `release`. |
+| Tráfico en texto claro (HTTP) | Crítico | Configuración de `network_security_config.xml` forzando HTTPS. |
+| Fuga de memoria por URIs pesadas | Medio | Validación de tamaño máximo (5MB) antes del procesamiento. |
+| Acceso no autorizado a Galería | Bajo | Uso de `PickVisualMedia` (mínimo privilegio). |
+| Persistencia de datos sensibles | Alto | Almacenamiento exclusivo de URIs; nunca el binario de la imagen. |
+| Denegación de notificaciones | Medio | Flujo de solicitud `POST_NOTIFICATIONS` solo bajo demanda. |
+| Falta de integridad en migración | Alto | Pruebas instrumentadas de Room verificando esquema v3. |
+
+
+---
+
 # Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
 
 ## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)
