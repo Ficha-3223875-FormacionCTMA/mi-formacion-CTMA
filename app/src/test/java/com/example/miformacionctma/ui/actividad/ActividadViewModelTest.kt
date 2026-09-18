@@ -330,4 +330,58 @@ class ActividadViewModelTest {
         // CA-08: La cancelación no debe dejar errores en el estado de sincronización.
         assertEquals(null, viewModel.errorSincronizacion.value)
     }
+
+    @Test
+    fun test18_estadoEstaSincronizando_cambiaCorrectamente() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } coAnswers {
+            kotlinx.coroutines.delay(100)
+        }
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        
+        // Forzamos el inicio de la corrutina de refresco
+        testScheduler.runCurrent()
+        
+        // Durante el delay de sincronizar()
+        assertTrue(viewModel.estaSincronizando.value)
+        
+        advanceUntilIdle()
+        
+        // Al terminar
+        assertTrue(!viewModel.estaSincronizando.value)
+    }
+
+    @Test
+    fun test19_error401_limpiaSesion() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("Sesión expirada (401)")
+        
+        com.example.miformacionctma.data.remote.auth.TokenProvider.setToken("token-viejo")
+        assertTrue(com.example.miformacionctma.data.remote.auth.TokenProvider.hasToken())
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        advanceUntilIdle()
+
+        // El token debe haberse limpiado
+        assertTrue(!com.example.miformacionctma.data.remote.auth.TokenProvider.hasToken())
+    }
+
+    @Test
+    fun test20_timeout_muestraMensajeEspecifico() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("El servidor tardó demasiado en responder")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        
+        // Debemos recolectar el StateFlow para que flatMapLatest funcione (SharingStarted.WhileSubscribed)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        
+        advanceUntilIdle()
+
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba un estado de Error pero fue $estado", estado is ListadoUiState.Error)
+        assertTrue((estado as ListadoUiState.Error).mensaje.contains("tardó demasiado"))
+        job.cancel()
+    }
 }

@@ -24,6 +24,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -182,6 +183,7 @@ fun ListaRoute(
     val soloUrgentes by viewModel.soloUrgentes.collectAsStateWithLifecycle()
     val operacionState by viewModel.operacionState.collectAsStateWithLifecycle()
     val errorSincronizacion by viewModel.errorSincronizacion.collectAsStateWithLifecycle()
+    val estaSincronizando by viewModel.estaSincronizando.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -224,6 +226,11 @@ fun ListaRoute(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
+            if (estaSincronizando) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
             Text(
                 text = "Mis actividades",
                 style = MaterialTheme.typography.titleLarge

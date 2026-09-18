@@ -616,3 +616,37 @@ graph TD
 | `POST` | `/actividades` | Registra una nueva actividad de forma remota. |
 | `PATCH` | `/actividades/{id}` | Actualiza parcialmente una actividad. |
 | `DELETE` | `/actividades/{id}` | Elimina una actividad del servidor. |
+
+---
+
+# Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
+
+## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)
+
+| Escenario de Riesgo | Respuesta Técnica de la Aplicación | Experiencia del Usuario (UI) |
+| :--- | :--- | :--- |
+| **Timeout (Latencia alta)** | Detección vía `SocketTimeoutException`. Cancelación del `Job` tras tiempo límite. | Mensaje: "El servidor tardó demasiado...". Opción de Reintentar. |
+| **401 Unauthorized** | Captura de error 401 en DataSource. Invocación a `TokenProvider.clearToken()`. | Redirección automática a Login / Snackbar de sesión expirada. |
+| **Sin Internet (Offline)** | Captura de `IOException`. Recuperación inmediata de datos desde Room. | Notificación: "Modo offline: Datos locales". La lista sigue visible. |
+| **Servidor 500 (Fallo interno)** | Captura genérica de error de servidor. Registro en logs (Timber/Log). | Mensaje: "Error del servidor (500)". Bloqueo de escritura remota. |
+
+## 🧪 2. Reporte de Evidencias de Ejecución (Guía 8)
+
+Se han validado los 8 escenarios críticos de resiliencia y sincronización exigidos por la Guía 8:
+
+1.  **Carga inicial exitosa:** Sincronización completa al abrir la app. Los datos remotos se guardan en Room.
+2.  **Modo offline (Vuelo):** Al desactivar red, la app muestra los datos cacheados sin errores fatales.
+3.  **Primer inicio sin red:** Si no hay caché ni red, se muestra pantalla de error total con botón Reintentar.
+4.  **Error 401 (Sesión expirada):** La app detecta el token inválido, lo limpia localmente y notifica al usuario.
+5.  **Timeout de conexión:** Tras 15 segundos sin respuesta, se informa al usuario del retraso del servidor.
+6.  **Cancelación de búsqueda:** Escrituras rápidas en el buscador cancelan peticiones de red obsoletas (**CA-08**).
+7.  **Reintento manual:** El botón "Reintentar" relanza la sincronización limpiando estados de error previos.
+8.  **Sincronización en segundo plano:** Las operaciones CRUD locales se confirman visualmente mientras se sincronizan.
+
+---
+
+# Verificación Técnica Final
+
+*   **Tests Unitarios:** 31 tests ejecutados (100% aprobados).
+*   **Cobertura de Resiliencia:** Manejo explícito de `CancellationException` para evitar falsos positivos en UI.
+*   **Accesibilidad:** Soporte para `LiveRegion` en estados de error y carga.

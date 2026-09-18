@@ -37,6 +37,9 @@ class ActividadViewModel(
     private val _errorSincronizacion = MutableStateFlow<String?>(null)
     val errorSincronizacion = _errorSincronizacion.asStateFlow()
 
+    private val _estaSincronizando = MutableStateFlow(false)
+    val estaSincronizando = _estaSincronizando.asStateFlow()
+
     private var refreshJob: Job? = null
 
     init {
@@ -50,6 +53,7 @@ class ActividadViewModel(
     fun refrescar() {
         refreshJob?.cancel()
         refreshJob = viewModelScope.launch {
+            _estaSincronizando.value = true
             _errorSincronizacion.value = null
             try {
                 repository.sincronizar()
@@ -57,6 +61,13 @@ class ActividadViewModel(
                 throw e
             } catch (e: Exception) {
                 _errorSincronizacion.value = e.message ?: "Error de red"
+                
+                // Manejo específico de 401: Cerrar sesión (Requerimiento Laverde)
+                if (e.message?.contains("401") == true || e.message?.contains("Sesión expirada") == true) {
+                    com.example.miformacionctma.data.remote.auth.TokenProvider.clearToken()
+                }
+            } finally {
+                _estaSincronizando.value = false
             }
         }
     }
