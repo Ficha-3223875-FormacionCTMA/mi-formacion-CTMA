@@ -6,6 +6,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.miformacionctma.data.local.entity.ActividadFormativa
+import com.example.miformacionctma.data.local.entity.EvidenciaEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -31,26 +32,35 @@ class BaseDatosTest {
         val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .setDriver(AndroidSQLiteDriver())
             .build()
-        val dao = db.actividadDao()
+        
+        val actividadDao = db.actividadDao()
+        val evidenciaDao = db.evidenciaDao()
 
-        val actividad = ActividadFormativa(
-            titulo = "Test DAO",
-            progreso = 10,
-            diasRestantes = 2,
-            prioridad = "ALTA",
-            resuelto = true
+        // 1. Insertar actividad
+        val actividadId = actividadDao.insertar(
+            ActividadFormativa(
+                titulo = "Test con Evidencia",
+                progreso = 0,
+                diasRestantes = 5,
+                prioridad = "MEDIA"
+            )
         )
 
-        val id = dao.insertar(actividad)
-        val recuperada = dao.obtenerPorId(id).first()
+        // 2. Insertar evidencia
+        val evidencia = EvidenciaEntity(
+            actividadId = actividadId,
+            uri = "content://media/external/images/media/1",
+            tipoMime = "image/jpeg",
+            tamanio = 1024L,
+            estado = "LOCAL"
+        )
+        val evidenciaId = evidenciaDao.insertar(evidencia)
 
-        assertNotNull(recuperada)
-        assertEquals("Test DAO", recuperada?.titulo)
-        assertEquals(true, recuperada?.resuelto)
-
-        // Test Búsqueda
-        val resultados = dao.buscarPorTexto("Test").first()
-        assertEquals(1, resultados.size)
+        // 3. Recuperar y validar
+        val recuperadas = evidenciaDao.obtenerPorActividad(actividadId).first()
+        assertNotNull(recuperadas)
+        assertEquals(1, recuperadas.size)
+        assertEquals("image/jpeg", recuperadas[0].tipoMime)
 
         db.close()
     }
