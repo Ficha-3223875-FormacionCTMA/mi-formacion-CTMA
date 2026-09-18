@@ -670,6 +670,60 @@ graph TD
 
 ---
 
+# Semana 9 — Capacidades del Dispositivo y Seguridad
+
+Integración de funciones de hardware (Cámara y Galería) y reforzamiento de la seguridad de red y permisos.
+
+## 🏗️ 1. Modelo de Datos de Evidencias
+
+Se implementó la persistencia para adjuntos fotográficos relacionada con las actividades:
+
+*   **Tabla `evidencias`:** Almacena metadatos (URI, MIME, tamaño) y el estado de sincronización.
+*   **Relación:** `ActividadFormativa` (1) ➔ `Evidencia` (N).
+*   **Migración de Room (v2 ➔ v3):** Implementada para soportar el nuevo esquema sin pérdida de datos.
+
+## 🔄 2. Estados del Ciclo de Vida de la Evidencia
+
+| Estado | Descripción |
+| :--- | :--- |
+| `LOCAL` | Capturada o seleccionada, pendiente de envío. |
+| `SUBIENDO` | Transferencia activa al servidor. |
+| `SINCRONIZADA` | Confirmada por el backend. |
+| `FALLIDA` | Error de red o validación (reintentable). |
+
+## 🛡️ 3. Matriz de Riesgos y Controles (Transversal)
+
+| Riesgo | Impacto | Control / Mitigación | Módulo Responsable |
+| :--- | :--- | :--- | :--- |
+| Archivos de imagen corruptos o no legibles | Alto | Validación de legibilidad mediante `ContentResolver.openFileDescriptor` antes de procesar el registro. | `EvidenciaRepository` |
+| Tamaño de evidencia superior a 5 MB | Medio | Verificación estricta del tamaño del archivo en bytes antes de iniciar el flujo de red. | `EvidenciaRepository` |
+| Tipos MIME no permitidos (ej. GIF, PDF) | Alto | Filtrado de extensiones aceptadas (`image/jpeg`, `image/png`, `image/webp`) vía `ContentResolver.getType`. | `EvidenciaRepository` |
+| Pérdida de conectividad durante envío multipart | Alto | Implementación de máquina de estados; la evidencia queda en estado `FALLIDA` en Room, nunca se elimina el archivo local. | `EvidenciaRepository` |
+| Errores de servidor (HTTP 5xx / 4xx) | Medio | Propagación de excepciones hacia el ViewModel y notificación al usuario mediante interfaz resiliente. | `RemoteActividadDataSource` |
+| Uso indebido de `file://` URIs | Alto | Uso obligatorio de `content://` URIs integrando `PickVisualMedia` y `FileProvider` para aislamiento de datos. | `Módulo Evidencias` |
+| Filtración de tokens o URIs en Logcat | Crítico | Configuración de interceptores de OkHttp para deshabilitar logs detallados en la variante `Release`. | `NetworkModule` |
+| Revocación de permisos `POST_NOTIFICATIONS` | Medio | Verificación dinámica de permisos en Android 13+ y manejo de estados degradados sin crash. | `Módulo Transversal` |
+
+## ⚙️ 4. Configuración de Ambientes y Políticas
+
+Para garantizar la integridad y seguridad de los datos, el proyecto implementa las siguientes políticas:
+
+*   **Ambientes (Flavors):**
+    *   `dev`: Conexión a servidores de desarrollo con logs de red habilitados.
+    *   `stage`: Ambiente de pre-producción para validación de criterios de aceptación.
+    *   `prod`: Ambiente final con optimizaciones de R8/ProGuard y seguridad máxima.
+*   **HTTPS Estricto:** Se prohíbe el tráfico de texto claro (HTTP) mediante `network_security_config.xml`. Todas las comunicaciones con el backend deben utilizar TLS 1.2+.
+
+## 🚀 5. Ejecución del Build de Producción
+
+Para generar el APK de producción optimizado, ejecute el siguiente comando en la terminal:
+
+```bash
+./gradlew assembleProdRelease
+```
+
+---
+
 # Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
 
 ## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)

@@ -6,6 +6,7 @@ import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.miformacionctma.data.local.entity.ActividadFormativa
+import com.example.miformacionctma.data.local.entity.EvidenciaEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -32,6 +33,7 @@ class BaseDatosTest {
             .build()
         dao = db.actividadDao()
     }
+
 
     @After
     @Throws(IOException::class)
@@ -86,4 +88,44 @@ class BaseDatosTest {
         val recuperada = dao.obtenerPorId(id).first()
         assertEquals(100, recuperada?.progreso)
     }
+
+    @Test
+    fun testDaoOperaciones() = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
+            .setDriver(AndroidSQLiteDriver())
+            .build()
+        
+        val actividadDao = db.actividadDao()
+        val evidenciaDao = db.evidenciaDao()
+
+        // 1. Insertar actividad
+        val actividadId = actividadDao.insertar(
+            ActividadFormativa(
+                titulo = "Test con Evidencia",
+                progreso = 0,
+                diasRestantes = 5,
+                prioridad = "MEDIA"
+            )
+        )
+
+        // 2. Insertar evidencia
+        val evidencia = EvidenciaEntity(
+            actividadId = actividadId,
+            uri = "content://media/external/images/media/1",
+            tipoMime = "image/jpeg",
+            tamanio = 1024L,
+            estado = "LOCAL"
+        )
+        val evidenciaId = evidenciaDao.insertar(evidencia)
+
+        // 3. Recuperar y validar
+        val recuperadas = evidenciaDao.obtenerPorActividad(actividadId).first()
+        assertNotNull(recuperadas)
+        assertEquals(1, recuperadas.size)
+        assertEquals("image/jpeg", recuperadas[0].tipoMime)
+
+        db.close()
+    }
+
 }
