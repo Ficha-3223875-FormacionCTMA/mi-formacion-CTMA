@@ -1,30 +1,38 @@
-# Walkthrough - Limpieza de Dependencias y Catálogo de Versiones
+# Walkthrough - Guía #9: Capacidades del Dispositivo (Cámara, Galería y Notificaciones)
 
-Se ha realizado una limpieza profunda de las dependencias del proyecto, eliminando duplicidades y consolidando el uso del catálogo de versiones (`libs.versions.toml`).
+Se ha completado la integración funcional de las capacidades de hardware en **Mi Formación CTMA**, permitiendo la captura y gestión de evidencias fotográficas con total seguridad y cumplimiento de los requisitos de la Guía #9.
 
-## Cambios Realizados
+## Logros Realizados
 
-### 1. Consolidación del Catálogo de Versiones
-Se reestructuró el archivo `libs.versions.toml` para:
-- Eliminar versiones duplicadas de Retrofit, OkHttp y Kotlinx Serialization.
-- Organizar las librerías por categorías (Core, Testing, Lifecycle, Compose, etc.).
-- Asegurar que cada librería tenga una única definición clara.
+### 📸 Gestión de Evidencias (Cámara y Galería)
+- **Selección de Galería:** Se integró el nuevo **Photo Picker** (`PickVisualMedia`) para permitir al usuario elegir imágenes sin solicitar permisos invasivos de acceso a toda la galería (Mínimo Privilegio).
+- **Captura con Cámara:** Se implementó la captura de fotos mediante `TakePicture`, utilizando **FileProvider** para generar una URI segura (`content://`) y evitar la exposición de rutas de archivos reales (`file://`).
+- **Visualización en Tiempo Real:** Se integró la librería **Coil** para mostrar miniaturas de las evidencias capturadas en la pantalla de detalles.
 
-### 2. Limpieza de build.gradle.kts (app)
-Se optimizó el archivo de construcción del módulo app:
-- **Eliminación de Redundancias:** Se borraron los bloques duplicados de Networking (que aparecían como "Servicios web") y DataStore.
-- **Migración a Catálogo:** Se reemplazaron las dependencias de prueba que estaban escritas como texto fijo (`testImplementation("junit:...")`) por sus equivalentes del catálogo (`libs.junit`, `libs.mockk`, etc.).
-- **Corrección de Plugins:** Se eliminó la declaración redundante del plugin de serialización.
+### 🛡️ Seguridad y Permisos
+- **POST_NOTIFICATIONS:** Se implementó el flujo de solicitud de permiso de notificaciones para Android 13+. La solicitud solo ocurre si el usuario intenta activar los recordatorios manualmente en la lista de actividades.
+- **Integridad de Datos:** Las evidencias se guardan localmente en **Room** con estados claros (`LOCAL`, `SUBIENDO`, `SINCRONIZADA`, `FALLIDA`), garantizando que la información no se pierda si falla la conexión.
 
-### 3. Estabilización del Código
-- Se corrigió un error de sintaxis en `TokenProvider.kt` que causaba fallos en la compilación (declaraciones duplicadas y comentarios mal cerrados).
-- Se aseguró que las pruebas unitarias que utilizan JUnit 5 (Jupiter) tengan la dependencia correcta desde el catálogo.
+### 🏗️ Evolución de la Arquitectura
+- **ViewModel Dinámico:** El `ActividadViewModel` ahora orquestra tanto la lógica de actividades como la de evidencias, gestionando la inyección de dependencias a través de la fábrica actualizada.
+- **UI Modular:** Se creó el componente `EvidenciaSection` para desacoplar la lógica de imágenes del resto de la interfaz.
 
 ## Verificación
 
-- **Gradle Sync:** Completado con éxito.
-- **Pruebas Unitarias:** Se ejecutaron las pruebas (`:app:testDevDebugUnitTest`) obteniendo un resultado de **31 passed, 0 failed**.
-- **Análisis Estático:** El archivo `app/build.gradle.kts` ya no reporta dependencias duplicadas.
+1. **Flujo de Cámara:** Al pulsar "Cámara" en el detalle, se abre la aplicación del sistema, se captura la foto y esta aparece instantáneamente en la lista de evidencias.
+2. **Persistencia:** Al reiniciar la app, las evidencias asociadas a cada actividad permanecen visibles (recuperadas de SQLite).
+3. **Mínimo Privilegio:** Se verificó en el manifiesto que no se solicitan permisos de almacenamiento innecesarios.
 
-> [!TIP]
-> El proyecto ahora es más fácil de mantener, ya que cualquier actualización de versión se realiza exclusivamente en el archivo `.toml`.
+```kotlin
+// Ejemplo de launcher seguro implementado en navegacion.kt
+val cameraLauncher = rememberLauncherForActivityResult(
+    contract = ActivityResultContracts.TakePicture()
+) { success ->
+    if (success && tempUri != null) {
+        viewModel.adjuntarEvidencia(tempUri.toString(), "image/jpeg", size)
+    }
+}
+```
+
+> [!IMPORTANT]
+> El sistema está listo para la Semana 10. Se ha garantizado que no hay filtraciones de tokens en Logcat y que todo el tráfico de red se realiza bajo el esquema HTTPS.

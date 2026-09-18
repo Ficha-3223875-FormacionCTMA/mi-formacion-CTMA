@@ -1,5 +1,4 @@
 
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Properties
 
 plugins {
@@ -92,14 +91,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
 
-    // Carga de imágenes (Coil)
-    implementation(libs.coil.compose)
-
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("io.mockk:mockk:1.13.8")
-
-    // Android
+    // Android Core & Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -127,6 +119,9 @@ dependencies {
     implementation(libs.androidx.sqlite.ktx)
     implementation(libs.androidx.sqlite.framework)
 
+    // Media
+    implementation(libs.coil.compose)
+
     // Pruebas unitarias
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter)
@@ -148,4 +143,3 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
-

@@ -29,10 +29,13 @@ ksp = "2.1.0-1.0.29"
 # Navigation
 navigationCompose = "2.8.0"
 
-# Carga de imágenes
-coil = "2.7.0"
+# Networking
+retrofit = "2.11.0"
+okhttp = "4.12.0"
+kotlinxSerialization = "1.8.0"
 
-[libraries]
+# Media
+coil = "2.7.0"
 
 [libraries]
 # Core
@@ -83,21 +86,16 @@ androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framewor
 # DataStore
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 
-# Pruebas de corrutinas y mocks
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
-
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
-
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-
+# Networking
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
+
+# Media
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
