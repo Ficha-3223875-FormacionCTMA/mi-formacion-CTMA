@@ -8,9 +8,6 @@ lifecycleRuntimeKtx = "2.8.7"
 lifecycleRuntimeCompose = "2.8.7"
 activityCompose = "1.9.3"
 kotlin = "2.1.0"
-retrofit = "3.0.0"
-okhttp = "4.12.0"
-kotlinxSerialization = "1.8.0"
 composeBom = "2024.11.00"
 lifecycleViewModelCompose = "2.8.7"
 kotlinxCoroutines = "1.9.0"
@@ -26,7 +23,7 @@ sqlite = "2.7.1"
 # DataStore
 datastore = "1.2.1"
 
-# KSP compatible con Kotlin 2.1.0
+# KSP
 ksp = "2.1.0-1.0.29"
 
 # Navigation
@@ -35,40 +32,39 @@ navigationCompose = "2.8.0"
 # Networking
 retrofit = "2.11.0"
 okhttp = "4.12.0"
-kotlinxSerialization = "1.7.3"
+kotlinxSerialization = "1.8.0"
 
 [libraries]
-
+# Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 
+# Testing (Unit)
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
 
+# Testing (Android)
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
-
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 
+# Lifecycle
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
-
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
-
 androidx-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleViewModelCompose" }
 
+# Activity and Compose
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
-
 androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
-
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
-
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-
 androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
-
 androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 
 # Navigation
@@ -76,16 +72,12 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 
 # Room 3
 androidx-room3-runtime = { group = "androidx.room3", name = "room3-runtime", version.ref = "room" }
-
 androidx-room3-compiler = { group = "androidx.room3", name = "room3-compiler", version.ref = "room" }
-
 androidx-room3-testing = { group = "androidx.room3", name = "room3-testing", version.ref = "room" }
 
 # SQLite
 androidx-sqlite = { group = "androidx.sqlite", name = "sqlite", version.ref = "sqlite" }
-
 androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.ref = "sqlite" }
-
 androidx-sqlite-framework = { group = "androidx.sqlite", name = "sqlite-framework", version.ref = "sqlite" }
 
 # DataStore
@@ -97,31 +89,9 @@ retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", n
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-
-# Pruebas de corrutinas y mocks
-kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
-
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
-
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
-mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
-mockk-android = { group = "io.mockk", name = "mockk-android", version.ref = "mockk" }
-junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
-
-retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-
-retrofit-converter-kotlinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
-
-okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
-
-okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
-
 mockwebserver = { group = "com.squareup.okhttp3", name = "mockwebserver", version.ref = "okhttp" }
 
 [plugins]
-
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlinAndroidSetup = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
