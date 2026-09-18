@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.data.repository.ActividadRepository
 import com.example.miformacionctma.data.repository.PreferenciasRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,24 +34,66 @@ class ActividadViewModel(
     private val _operacionState = MutableStateFlow<OperacionUiState>(OperacionUiState.Inactiva)
     val operacionState = _operacionState.asStateFlow()
 
+    private val _errorSincronizacion = MutableStateFlow<String?>(null)
+    val errorSincronizacion = _errorSincronizacion.asStateFlow()
+
+    private val _estaSincronizando = MutableStateFlow(false)
+    val estaSincronizando = _estaSincronizando.asStateFlow()
+
+    private var refreshJob: Job? = null
+
+    init {
+        refrescar()
+    }
+
+    /**
+     * Intenta sincronizar los datos con el servidor.
+     * Implementa manejo de concurrencia y cancelación (CA-08).
+     */
+    fun refrescar() {
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
+            _estaSincronizando.value = true
+            _errorSincronizacion.value = null
+            try {
+                repository.sincronizar()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _errorSincronizacion.value = e.message ?: "Error de red"
+                
+                // Manejo específico de 401: Cerrar sesión (Requerimiento Laverde)
+                if (e.message?.contains("401") == true || e.message?.contains("Sesión expirada") == true) {
+                    com.example.miformacionctma.data.remote.auth.TokenProvider.clearToken()
+                }
+            } finally {
+                _estaSincronizando.value = false
+            }
+        }
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<ListadoUiState> =
-        combine(_textoBusqueda, _soloUrgentes) { query, urgentes ->
-            query to urgentes
-        }.flatMapLatest { (query, urgentes) ->
+        combine(_textoBusqueda, _soloUrgentes, _errorSincronizacion) { query, urgentes, error ->
+            Triple(query, urgentes, error)
+        }.flatMapLatest { (query, urgentes, error) ->
             if (query.isBlank()) {
                 repository.obtenerTodas()
             } else {
                 repository.buscarPorTexto(query)
             }.map { lista ->
-                if (urgentes) {
+                val actividades = if (urgentes) {
                     ReglasActividad.actividadesUrgentes(lista)
                 } else {
                     lista
                 }
+
+                when {
+                    actividades.isNotEmpty() -> ListadoUiState.Contenido(actividades)
+                    error != null -> ListadoUiState.Error(error) // Fallo red + No caché
+                    else -> ListadoUiState.Vacio // Sin datos pero sin error de red (o cargando)
+                }
             }
-        }.map { lista ->
-            if (lista.isEmpty()) ListadoUiState.Vacio else ListadoUiState.Contenido(lista)
         }.onStart {
             emit(ListadoUiState.Cargando)
         }.catch { e ->

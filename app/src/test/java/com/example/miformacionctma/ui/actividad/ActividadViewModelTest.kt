@@ -4,24 +4,25 @@ import com.example.miformacionctma.data.repository.ActividadRepository
 import com.example.miformacionctma.data.repository.PreferenciasRepository
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
-
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ActividadViewModelTest {
@@ -29,19 +30,21 @@ class ActividadViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var repository: ActividadRepository
     private lateinit var preferencias: PreferenciasRepository
-    private lateinit var viewModel: ActividadViewModel
+
+    private val actividadPrueba = ActividadFormativa(
+        id = 1,
+        titulo = "Prueba Kotlin",
+        descripcion = "Test unitario",
+        progreso = 50,
+        diasRestantes = 3,
+        prioridad = Prioridad.ALTA
+    )
 
     @Before
-    fun setup() {
+    fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        repository = mock(ActividadRepository::class.java)
-        preferencias = mock(PreferenciasRepository::class.java)
-        
-        // Configuración por defecto
-        `when`(repository.obtenerTodas()).thenReturn(flowOf(emptyList()))
-        `when`(preferencias.filtroCategoria).thenReturn(flowOf("TODAS"))
-        
-        viewModel = ActividadViewModel(repository, preferencias)
+        repository = mockk(relaxed = true)
+        preferencias = mockk(relaxed = true)
     }
 
     @After
@@ -49,58 +52,336 @@ class ActividadViewModelTest {
         Dispatchers.resetMain()
     }
 
-    @Test
-    fun `al iniciar el estado debe ser Cargando y luego Vacio si no hay datos`() = runTest {
-        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.uiState.collect {}
-        }
+    // --- 1. Estado Inicial y Carga ---
 
-        // El initialValue es Cargando
-        assertTrue(viewModel.uiState.value is ListadoUiState.Cargando)
-        
-        advanceUntilIdle()
-        
-        assertTrue(viewModel.uiState.value is ListadoUiState.Vacio)
-        collectJob.cancel()
+    @Test
+    fun test01_estadoInicial_debeSerCargando() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        assertEquals(ListadoUiState.Cargando, viewModel.uiState.value)
     }
 
     @Test
-    fun `al recibir actividades el estado debe ser Contenido`() = runTest {
-        val lista = listOf(
-            ActividadFormativa(id = 1, titulo = "Test", prioridad = Prioridad.ALTA)
-        )
-        `when`(repository.obtenerTodas()).thenReturn(flowOf(lista))
-        
-        viewModel = ActividadViewModel(repository, preferencias)
-        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.uiState.collect {}
-        }
+    fun test02_cargaConExito_emiteEstadoContenido() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        val viewModel = ActividadViewModel(repository, preferencias)
 
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
         advanceUntilIdle()
-        
-        val state = viewModel.uiState.value
-        assertTrue(state is ListadoUiState.Contenido)
-        assertEquals(1, (state as ListadoUiState.Contenido).actividades.size)
-        collectJob.cancel()
+
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Contenido pero fue $estado", estado is ListadoUiState.Contenido)
+        assertEquals(1, (estado as ListadoUiState.Contenido).actividades.size)
+        job.cancel()
+    }
+
+    // --- 2. Filtros y Lista Vacía ---
+
+    @Test
+    fun test03_listaSinResultados_emiteEstadoVacio() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        assertEquals(ListadoUiState.Vacio, viewModel.uiState.value)
+        job.cancel()
     }
 
     @Test
-    fun `la busqueda filtra los resultados`() = runTest {
-        val lista = listOf(
-            ActividadFormativa(id = 1, titulo = "Android", prioridad = Prioridad.ALTA)
-        )
-        `when`(repository.buscarPorTexto("And")).thenReturn(flowOf(lista))
-        
-        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) {
-            viewModel.uiState.collect {}
+    fun test04_filtroUrgentes_activaFiltroYEmiteResultados() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        viewModel.cambiarFiltroUrgentes(true)
+        advanceUntilIdle()
+
+        assertTrue(viewModel.soloUrgentes.value)
+        job.cancel()
+    }
+
+    @Test
+    fun test05_filtroUrgentesDesactivado_mantieneEstadoCorrecto() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        viewModel.cambiarFiltroUrgentes(false)
+        advanceUntilIdle()
+
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Contenido pero fue $estado", estado is ListadoUiState.Contenido)
+        job.cancel()
+    }
+
+    // --- 3. Búsqueda y Cancelación ---
+
+    @Test
+    fun test06_busquedaRapida_cancelaConsultasAnteriores() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.buscarPorTexto(any()) } returns flowOf(listOf(actividadPrueba))
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        viewModel.actualizarBusqueda("A")
+        viewModel.actualizarBusqueda("An")
+        viewModel.actualizarBusqueda("Android")
+        advanceUntilIdle()
+
+        assertEquals("Android", viewModel.textoBusqueda.value)
+        coVerify(exactly = 1) { repository.buscarPorTexto("Android") }
+        job.cancel()
+    }
+
+    @Test
+    fun test07_busquedaVacia_llamaObtenerTodas() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        coEvery { repository.buscarPorTexto("Android") } returns flowOf(listOf(actividadPrueba))
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        viewModel.actualizarBusqueda("Android")
+        advanceUntilIdle()
+
+        viewModel.actualizarBusqueda("")
+        advanceUntilIdle()
+
+        coVerify(atLeast = 1) { repository.obtenerTodas() }
+        job.cancel()
+    }
+
+    @Test
+    fun test08_busquedaSinCoincidencias_emiteEstadoVacio() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.buscarPorTexto("Inexistente") } returns flowOf(emptyList())
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        viewModel.actualizarBusqueda("Inexistente")
+        advanceUntilIdle()
+
+        assertEquals(ListadoUiState.Vacio, viewModel.uiState.value)
+        job.cancel()
+    }
+
+    // --- 4. Operaciones CRUD y OperacionUiState ---
+
+    @Test
+    fun test09_insertarActividad_emiteEstadoExitosa() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.insertar(any()) } returns 1L
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.operacionState.collect() }
+        viewModel.insertar(actividadPrueba)
+        advanceUntilIdle()
+
+        assertEquals(OperacionUiState.Exitosa, viewModel.operacionState.value)
+        job.cancel()
+    }
+
+    @Test
+    fun test10_actualizarActividad_emiteEstadoExitosa() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.actualizar(any()) } returns Unit
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.operacionState.collect() }
+        viewModel.actualizar(actividadPrueba)
+        advanceUntilIdle()
+
+        assertEquals(OperacionUiState.Exitosa, viewModel.operacionState.value)
+        coVerify(exactly = 1) { repository.actualizar(actividadPrueba) }
+        job.cancel()
+    }
+
+    @Test
+    fun test11_eliminarActividad_emiteEstadoExitosa() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.eliminar(any()) } returns Unit
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.operacionState.collect() }
+        viewModel.eliminar(actividadPrueba)
+        advanceUntilIdle()
+
+        assertEquals(OperacionUiState.Exitosa, viewModel.operacionState.value)
+        coVerify(exactly = 1) { repository.eliminar(actividadPrueba) }
+        job.cancel()
+    }
+
+    @Test
+    fun test12_operacionFallida_emiteEstadoFallida() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.insertar(any()) } throws Exception("Error al insertar")
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.operacionState.collect() }
+        viewModel.insertar(actividadPrueba)
+        advanceUntilIdle()
+
+        val estado = viewModel.operacionState.value
+        assertTrue(estado is OperacionUiState.Fallida)
+        assertEquals("Error al insertar", (estado as OperacionUiState.Fallida).mensaje)
+        job.cancel()
+    }
+
+    // --- 5. Manejo de Errores y Limpieza ---
+
+    @Test
+    fun test13_errorEnRepositorio_emiteListadoUiStateError() = runTest {
+        coEvery { repository.obtenerTodas() } returns flow { throw Exception("Fallo en base de datos") }
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        val estado = viewModel.uiState.value
+        assertTrue(estado is ListadoUiState.Error)
+        assertEquals("Fallo en base de datos", (estado as ListadoUiState.Error).mensaje)
+        job.cancel()
+    }
+
+    @Test
+    fun test14_resetearEstadoOperacion_regresaAEstadoInactivo() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.insertar(any()) } returns 1L
+        val viewModel = ActividadViewModel(repository, preferencias)
+
+        val job = backgroundScope.launch(testDispatcher) { viewModel.operacionState.collect() }
+        viewModel.insertar(actividadPrueba)
+        advanceUntilIdle()
+
+        viewModel.resetearEstadoOperacion()
+        advanceUntilIdle()
+
+        assertEquals(OperacionUiState.Inactiva, viewModel.operacionState.value)
+        job.cancel()
+    }
+
+    // --- 6. Resiliencia, Caché y Reintentos (Parte de Laverde) ---
+
+    @Test
+    fun test15_falloRedConCache_debeMostrarCache() = runTest {
+        // GIVEN: Red falla pero Room tiene datos
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        coEvery { repository.sincronizar() } throws Exception("Sin conexión")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        // THEN: El estado debe ser Contenido (proveniente de Room)
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Contenido tras fallo de red con caché pero fue $estado", estado is ListadoUiState.Contenido)
+        job.cancel()
+    }
+
+    @Test
+    fun test16_falloRedSinCache_debeMostrarError() = runTest {
+        // GIVEN: Red falla y Room está vacío
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("Fallo fatal de red")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        // THEN: El estado debe ser Error
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Error tras fallo de red sin caché pero fue $estado", estado is ListadoUiState.Error)
+        assertEquals("Fallo fatal de red", (estado as ListadoUiState.Error).mensaje)
+        job.cancel()
+    }
+
+    @Test
+    fun test17_dosRefrescosRapidos_ejecutaUltimaLlamada() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } coAnswers {
+            kotlinx.coroutines.delay(100) // Simula latencia
         }
 
-        viewModel.actualizarBusqueda("And")
+        val viewModel = ActividadViewModel(repository, preferencias)
+        advanceUntilIdle() // Ejecuta el refrescar() del init. total = 1
+
+        viewModel.refrescar() // Inicia refresco 2
+        testScheduler.advanceTimeBy(50) // Avanza un poco pero no termina el refresco 2
+        viewModel.refrescar() // Inicia refresco 3 y CANCELA el 2
+        
+        advanceUntilIdle()
+
+        // Deben registrarse 2 llamadas completas o iniciadas: la del init y la del último refrescar.
+        // La intermedia fue cancelada antes de completar (o incluso antes de empezar si no hubo delay).
+        coVerify(atLeast = 2) { repository.sincronizar() }
+        
+        // CA-08: La cancelación no debe dejar errores en el estado de sincronización.
+        assertEquals(null, viewModel.errorSincronizacion.value)
+    }
+
+    @Test
+    fun test18_estadoEstaSincronizando_cambiaCorrectamente() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } coAnswers {
+            kotlinx.coroutines.delay(100)
+        }
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        
+        // Forzamos el inicio de la corrutina de refresco
+        testScheduler.runCurrent()
+        
+        // Durante el delay de sincronizar()
+        assertTrue(viewModel.estaSincronizando.value)
+        
         advanceUntilIdle()
         
-        val state = viewModel.uiState.value
-        assertTrue(state is ListadoUiState.Contenido)
-        assertEquals("Android", (state as ListadoUiState.Contenido).actividades[0].titulo)
-        collectJob.cancel()
+        // Al terminar
+        assertTrue(!viewModel.estaSincronizando.value)
+    }
+
+    @Test
+    fun test19_error401_limpiaSesion() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("Sesión expirada (401)")
+        
+        com.example.miformacionctma.data.remote.auth.TokenProvider.setToken("token-viejo")
+        assertTrue(com.example.miformacionctma.data.remote.auth.TokenProvider.hasToken())
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        advanceUntilIdle()
+
+        // El token debe haberse limpiado
+        assertTrue(!com.example.miformacionctma.data.remote.auth.TokenProvider.hasToken())
+    }
+
+    @Test
+    fun test20_timeout_muestraMensajeEspecifico() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("El servidor tardó demasiado en responder")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        
+        // Debemos recolectar el StateFlow para que flatMapLatest funcione (SharingStarted.WhileSubscribed)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        
+        advanceUntilIdle()
+
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba un estado de Error pero fue $estado", estado is ListadoUiState.Error)
+        assertTrue((estado as ListadoUiState.Error).mensaje.contains("tardó demasiado"))
+        job.cancel()
     }
 }

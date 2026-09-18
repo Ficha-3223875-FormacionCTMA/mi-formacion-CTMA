@@ -577,3 +577,130 @@ Se añadió una suite de pruebas unitarias para el ViewModel (`ActividadViewMode
 *   `StandardTestDispatcher` y `UnconfinedTestDispatcher` para controlar el tiempo virtual.
 *   `runTest` para validar emisiones de flujos y transiciones de estado.
 *   Mocks de repositorios para aislar la lógica del ViewModel.
+
+---
+
+# Semana 8 — Networking y Sincronización (Offline-First)
+
+Se integró la capa de red para permitir la sincronización de actividades con un servidor remoto, manteniendo un enfoque "Offline-First" donde la base de datos local sigue siendo la fuente de verdad.
+
+## 🏗️ 1. Arquitectura Técnica de Red
+
+Se implementó el siguiente flujo de datos para la sincronización:
+
+```mermaid
+graph TD
+    A[Servidor API] -- Retrofit + OkHttp --> B[RemoteDataSource]
+    B -- DTOs --> C[Repository]
+    C -- Entidades --> D[(Room Database)]
+    D -- Flow --> E[ViewModel]
+    E -- StateFlow --> F[UI Compose]
+    
+    F -- Eventos --> E
+    E -- Suspend Functions --> C
+    C -- Sincronización --> B
+```
+
+## 🛠️ 2. Componentes Implementados (Miguel)
+
+*   **Retrofit + Kotlin Serialization:** Configuración de un cliente HTTP robusto con interceptores de registro (Logging) y autenticación.
+*   **Gestión de Tokens:** Implementación de `TokenProvider` para el manejo seguro del encabezado `Authorization`.
+*   **Sincronización (Refresh):** Lógica en el repositorio para descargar datos remotos y actualizar la base de datos local mediante una estrategia de "reemplazo en conflicto".
+*   **Clasificación de Errores:** Manejo exhaustivo de excepciones de red (`IOException`, `HttpException` 401, 404, 500).
+
+## 📡 3. Contrato de API (Resumen)
+
+| Método | Endpoint | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/actividades` | Obtiene todas las actividades del servidor. |
+| `POST` | `/actividades` | Registra una nueva actividad de forma remota. |
+| `PATCH` | `/actividades/{id}` | Actualiza parcialmente una actividad. |
+| `DELETE` | `/actividades/{id}` | Elimina una actividad del servidor. |
+
+---
+
+# Semana 9 — Capacidades del Dispositivo y Seguridad
+
+Integración de funciones de hardware (Cámara y Galería) y reforzamiento de la seguridad de red y permisos.
+
+## 🏗️ 1. Modelo de Datos de Evidencias
+
+Se implementó la persistencia para adjuntos fotográficos relacionada con las actividades:
+
+*   **Tabla `evidencias`:** Almacena metadatos (URI, MIME, tamaño) y el estado de sincronización.
+*   **Relación:** `ActividadFormativa` (1) ➔ `Evidencia` (N).
+*   **Migración de Room (v2 ➔ v3):** Implementada para soportar el nuevo esquema sin pérdida de datos.
+
+## 🔄 2. Estados del Ciclo de Vida de la Evidencia
+
+| Estado | Descripción |
+| :--- | :--- |
+| `LOCAL` | Capturada o seleccionada, pendiente de envío. |
+| `SUBIENDO` | Transferencia activa al servidor. |
+| `SINCRONIZADA` | Confirmada por el backend. |
+| `FALLIDA` | Error de red o validación (reintentable). |
+
+## 🛡️ 3. Matriz de Riesgos y Controles (Transversal)
+
+| Riesgo | Impacto | Control / Mitigación | Módulo Responsable |
+| :--- | :--- | :--- | :--- |
+| Archivos de imagen corruptos o no legibles | Alto | Validación de legibilidad mediante `ContentResolver.openFileDescriptor` antes de procesar el registro. | `EvidenciaRepository` |
+| Tamaño de evidencia superior a 5 MB | Medio | Verificación estricta del tamaño del archivo en bytes antes de iniciar el flujo de red. | `EvidenciaRepository` |
+| Tipos MIME no permitidos (ej. GIF, PDF) | Alto | Filtrado de extensiones aceptadas (`image/jpeg`, `image/png`, `image/webp`) vía `ContentResolver.getType`. | `EvidenciaRepository` |
+| Pérdida de conectividad durante envío multipart | Alto | Implementación de máquina de estados; la evidencia queda en estado `FALLIDA` en Room, nunca se elimina el archivo local. | `EvidenciaRepository` |
+| Errores de servidor (HTTP 5xx / 4xx) | Medio | Propagación de excepciones hacia el ViewModel y notificación al usuario mediante interfaz resiliente. | `RemoteActividadDataSource` |
+| Uso indebido de `file://` URIs | Alto | Uso obligatorio de `content://` URIs integrando `PickVisualMedia` y `FileProvider` para aislamiento de datos. | `Módulo Evidencias` |
+| Filtración de tokens o URIs en Logcat | Crítico | Configuración de interceptores de OkHttp para deshabilitar logs detallados en la variante `Release`. | `NetworkModule` |
+| Revocación de permisos `POST_NOTIFICATIONS` | Medio | Verificación dinámica de permisos en Android 13+ y manejo de estados degradados sin crash. | `Módulo Transversal` |
+
+## ⚙️ 4. Configuración de Ambientes y Políticas
+
+Para garantizar la integridad y seguridad de los datos, el proyecto implementa las siguientes políticas:
+
+*   **Ambientes (Flavors):**
+    *   `dev`: Conexión a servidores de desarrollo con logs de red habilitados.
+    *   `stage`: Ambiente de pre-producción para validación de criterios de aceptación.
+    *   `prod`: Ambiente final con optimizaciones de R8/ProGuard y seguridad máxima.
+*   **HTTPS Estricto:** Se prohíbe el tráfico de texto claro (HTTP) mediante `network_security_config.xml`. Todas las comunicaciones con el backend deben utilizar TLS 1.2+.
+
+## 🚀 5. Ejecución del Build de Producción
+
+Para generar el APK de producción optimizado, ejecute el siguiente comando en la terminal:
+
+```bash
+./gradlew assembleProdRelease
+```
+
+---
+
+# Semana 8 — Gestión de Resiliencia y Riesgos de Red (Laverde)
+
+## 🏗️ 1. Matriz Riesgo–Respuesta (Capa de Red)
+
+| Escenario de Riesgo | Respuesta Técnica de la Aplicación | Experiencia del Usuario (UI) |
+| :--- | :--- | :--- |
+| **Timeout (Latencia alta)** | Detección vía `SocketTimeoutException`. Cancelación del `Job` tras tiempo límite. | Mensaje: "El servidor tardó demasiado...". Opción de Reintentar. |
+| **401 Unauthorized** | Captura de error 401 en DataSource. Invocación a `TokenProvider.clearToken()`. | Redirección automática a Login / Snackbar de sesión expirada. |
+| **Sin Internet (Offline)** | Captura de `IOException`. Recuperación inmediata de datos desde Room. | Notificación: "Modo offline: Datos locales". La lista sigue visible. |
+| **Servidor 500 (Fallo interno)** | Captura genérica de error de servidor. Registro en logs (Timber/Log). | Mensaje: "Error del servidor (500)". Bloqueo de escritura remota. |
+
+## 🧪 2. Reporte de Evidencias de Ejecución (Guía 8)
+
+Se han validado los 8 escenarios críticos de resiliencia y sincronización exigidos por la Guía 8:
+
+1.  **Carga inicial exitosa:** Sincronización completa al abrir la app. Los datos remotos se guardan en Room.
+2.  **Modo offline (Vuelo):** Al desactivar red, la app muestra los datos cacheados sin errores fatales.
+3.  **Primer inicio sin red:** Si no hay caché ni red, se muestra pantalla de error total con botón Reintentar.
+4.  **Error 401 (Sesión expirada):** La app detecta el token inválido, lo limpia localmente y notifica al usuario.
+5.  **Timeout de conexión:** Tras 15 segundos sin respuesta, se informa al usuario del retraso del servidor.
+6.  **Cancelación de búsqueda:** Escrituras rápidas en el buscador cancelan peticiones de red obsoletas (**CA-08**).
+7.  **Reintento manual:** El botón "Reintentar" relanza la sincronización limpiando estados de error previos.
+8.  **Sincronización en segundo plano:** Las operaciones CRUD locales se confirman visualmente mientras se sincronizan.
+
+---
+
+# Verificación Técnica Final
+
+*   **Tests Unitarios:** 31 tests ejecutados (100% aprobados).
+*   **Cobertura de Resiliencia:** Manejo explícito de `CancellationException` para evitar falsos positivos en UI.
+*   **Accesibilidad:** Soporte para `LiveRegion` en estados de error y carga.

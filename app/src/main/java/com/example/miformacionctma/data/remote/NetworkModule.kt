@@ -1,6 +1,8 @@
 package com.example.miformacionctma.data.remote
 
+
 import com.example.miformacionctma.BuildConfig
+
 import com.example.miformacionctma.data.remote.auth.TokenProvider
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -12,6 +14,9 @@ import kotlinx.serialization.json.Json
 
 object NetworkModule {
 
+
+    private const val BASE_URL = "https://e8512387-d5c5-4a51-b5b8-72604db1eb0b.mock.pstmn.io/"
+
     private val json = Json {
         ignoreUnknownKeys = true
         coerceInputValues = true
@@ -19,6 +24,7 @@ object NetworkModule {
     }
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
+
         level = if (BuildConfig.DEBUG) {
             HttpLoggingInterceptor.Level.BODY
         } else {
@@ -26,6 +32,9 @@ object NetworkModule {
         }
         // Sanitización: no loguear el header de Authorization
         redactHeader("Authorization")
+
+        level = HttpLoggingInterceptor.Level.BODY
+
     }
 
     private val authInterceptor = Interceptor { chain ->
@@ -42,7 +51,11 @@ object NetworkModule {
         .build()
 
     val retrofit: Retrofit = Retrofit.Builder()
+
         .baseUrl(BuildConfig.API_BASE_URL)
+
+        .baseUrl(BASE_URL)
+
         .client(okHttpClient)
         .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
         .build()
