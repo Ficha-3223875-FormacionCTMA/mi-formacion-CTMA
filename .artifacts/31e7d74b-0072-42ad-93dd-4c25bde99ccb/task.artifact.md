@@ -1,5 +1,0 @@
-- `[ ]` Implementar flujo `estaSincronizando` en `ActividadViewModel.kt`
-- `[ ]` Integrar `LinearProgressIndicator` en `navegacion.kt`
-- `[ ]` Añadir Matriz Riesgo-Respuesta en el `README.md`
-- `[ ]` Documentar los 8 escenarios de prueba en el `README.md`
-- `[ ]` Verificar funcionamiento con tests unitarios

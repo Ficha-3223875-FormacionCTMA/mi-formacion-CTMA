@@ -6,6 +6,7 @@ import com.example.miformacionctma.data.remote.api.ActividadApiService
 import com.example.miformacionctma.domain.ActividadFormativa
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.SocketTimeoutException
 
 /**
  * Implementación de Retrofit para la fuente de datos remota.
@@ -19,6 +20,8 @@ class RemoteActividadDataSource(
         return try {
             val response = apiService.obtenerActividades()
             response.map { it.toDomain() }
+        } catch (e: SocketTimeoutException) {
+            throw Exception("El servidor tardó demasiado en responder. Reintenta en un momento.")
         } catch (e: IOException) {
             throw Exception("Error de conexión. Revisa tu internet.")
         } catch (e: HttpException) {
