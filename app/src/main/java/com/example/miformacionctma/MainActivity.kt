@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -67,13 +68,14 @@ class MainActivity : ComponentActivity() {
             applicationContext
         )
 
+        // Configuración de la capa remota (Implementación de Miguel)
         val apiService = NetworkModule.retrofit.create(ActividadApiService::class.java)
         val remoteDataSource = RemoteActividadDataSource(apiService)
 
         val repository = ActividadRepository(
             actividadDao = database.actividadDao(),
-            remoteDataSource = remoteDataSource,
-            preferenciasRepository = preferenciasRepository
+            preferenciasRepository = preferenciasRepository,
+            remoteDataSource = remoteDataSource
         )
 
         val factory = ActividadViewModelFactory(
@@ -455,4 +457,3 @@ fun PantallaInicioEstadoVacioPreview() {
         )
     }
 }
-

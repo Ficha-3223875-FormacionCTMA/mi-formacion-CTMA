@@ -271,4 +271,63 @@ class ActividadViewModelTest {
         assertEquals(OperacionUiState.Inactiva, viewModel.operacionState.value)
         job.cancel()
     }
+
+    // --- 6. Resiliencia, Caché y Reintentos (Parte de Laverde) ---
+
+    @Test
+    fun test15_falloRedConCache_debeMostrarCache() = runTest {
+        // GIVEN: Red falla pero Room tiene datos
+        coEvery { repository.obtenerTodas() } returns flowOf(listOf(actividadPrueba))
+        coEvery { repository.sincronizar() } throws Exception("Sin conexión")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        // THEN: El estado debe ser Contenido (proveniente de Room)
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Contenido tras fallo de red con caché pero fue $estado", estado is ListadoUiState.Contenido)
+        job.cancel()
+    }
+
+    @Test
+    fun test16_falloRedSinCache_debeMostrarError() = runTest {
+        // GIVEN: Red falla y Room está vacío
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } throws Exception("Fallo fatal de red")
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        val job = backgroundScope.launch(testDispatcher) { viewModel.uiState.collect() }
+        advanceUntilIdle()
+
+        // THEN: El estado debe ser Error
+        val estado = viewModel.uiState.value
+        assertTrue("Se esperaba Error tras fallo de red sin caché pero fue $estado", estado is ListadoUiState.Error)
+        assertEquals("Fallo fatal de red", (estado as ListadoUiState.Error).mensaje)
+        job.cancel()
+    }
+
+    @Test
+    fun test17_dosRefrescosRapidos_ejecutaUltimaLlamada() = runTest {
+        coEvery { repository.obtenerTodas() } returns flowOf(emptyList())
+        coEvery { repository.sincronizar() } coAnswers {
+            kotlinx.coroutines.delay(100) // Simula latencia
+        }
+
+        val viewModel = ActividadViewModel(repository, preferencias)
+        advanceUntilIdle() // Ejecuta el refrescar() del init. total = 1
+
+        viewModel.refrescar() // Inicia refresco 2
+        testScheduler.advanceTimeBy(50) // Avanza un poco pero no termina el refresco 2
+        viewModel.refrescar() // Inicia refresco 3 y CANCELA el 2
+        
+        advanceUntilIdle()
+
+        // Deben registrarse 2 llamadas completas o iniciadas: la del init y la del último refrescar.
+        // La intermedia fue cancelada antes de completar (o incluso antes de empezar si no hubo delay).
+        coVerify(atLeast = 2) { repository.sincronizar() }
+        
+        // CA-08: La cancelación no debe dejar errores en el estado de sincronización.
+        assertEquals(null, viewModel.errorSincronizacion.value)
+    }
 }

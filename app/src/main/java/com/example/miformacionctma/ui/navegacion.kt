@@ -181,9 +181,11 @@ fun ListaRoute(
     val textoBusqueda by viewModel.textoBusqueda.collectAsStateWithLifecycle()
     val soloUrgentes by viewModel.soloUrgentes.collectAsStateWithLifecycle()
     val operacionState by viewModel.operacionState.collectAsStateWithLifecycle()
+    val errorSincronizacion by viewModel.errorSincronizacion.collectAsStateWithLifecycle()
     
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Feedback automático para operaciones de escritura
     LaunchedEffect(operacionState) {
         when (operacionState) {
             OperacionUiState.Exitosa -> {
@@ -195,6 +197,13 @@ fun ListaRoute(
                 viewModel.resetearEstadoOperacion()
             }
             else -> {}
+        }
+    }
+
+    // Feedback sutil para errores de sincronización en segundo plano (CA-03)
+    LaunchedEffect(errorSincronizacion) {
+        if (errorSincronizacion != null && uiState is ListadoUiState.Contenido) {
+            snackbarHostState.showSnackbar("Modo offline: No se pudo actualizar con el servidor.")
         }
     }
 
@@ -301,8 +310,25 @@ fun ListaRoute(
                     }
                 }
                 is ListadoUiState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("Error: ${uiState.mensaje}", color = MaterialTheme.colorScheme.error)
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite }
+                        ) {
+                            Text(
+                                text = "Error: ${uiState.mensaje}",
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Button(onClick = { viewModel.refrescar() }) {
+                                Text("Reintentar")
+                            }
+                        }
                     }
                 }
             }

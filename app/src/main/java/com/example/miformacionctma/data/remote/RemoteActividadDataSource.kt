@@ -1,55 +1,45 @@
 package com.example.miformacionctma.data.remote
 
+import com.example.miformacionctma.data.mapper.toDomain
+import com.example.miformacionctma.data.mapper.toDto
 import com.example.miformacionctma.data.remote.api.ActividadApiService
-import com.example.miformacionctma.data.remote.dto.ActividadDto
+import com.example.miformacionctma.domain.ActividadFormativa
 import retrofit2.HttpException
 import java.io.IOException
 
+/**
+ * Implementación de Retrofit para la fuente de datos remota.
+ * Integra la lógica de Miguel con el contrato unificado.
+ */
 class RemoteActividadDataSource(
     private val apiService: ActividadApiService
-) {
+) : ActividadRemoteDataSource {
 
-    suspend fun obtenerActividades(): Result<List<ActividadDto>> {
+    override suspend fun obtenerActividades(): List<ActividadFormativa> {
         return try {
             val response = apiService.obtenerActividades()
-            Result.success(response)
+            response.map { it.toDomain() }
         } catch (e: IOException) {
-            Result.failure(Exception("Error de conexión. Revisa tu internet."))
+            throw Exception("Error de conexión. Revisa tu internet.")
         } catch (e: HttpException) {
-            when (e.code()) {
-                401 -> Result.failure(Exception("Sesión expirada. Inicia sesión de nuevo."))
-                404 -> Result.failure(Exception("Recurso no encontrado."))
-                else -> Result.failure(Exception("Error del servidor: ${e.code()}"))
+            val mensaje = when (e.code()) {
+                401 -> "Sesión expirada. Inicia sesión de nuevo."
+                404 -> "Recurso no encontrado."
+                else -> "Error del servidor: ${e.code()}"
             }
-        } catch (e: Exception) {
-            Result.failure(e)
+            throw Exception(mensaje)
         }
     }
 
-    suspend fun crearActividad(actividad: ActividadDto): Result<ActividadDto> {
-        return try {
-            val response = apiService.crearActividad(actividad)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun crearActividad(actividad: ActividadFormativa): ActividadFormativa {
+        return apiService.crearActividad(actividad.toDto()).toDomain()
     }
 
-    suspend fun actualizarActividad(id: Long, actividad: ActividadDto): Result<ActividadDto> {
-        return try {
-            val response = apiService.actualizarActividad(id, actividad)
-            Result.success(response)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun actualizarActividad(actividad: ActividadFormativa) {
+        apiService.actualizarActividad(actividad.id, actividad.toDto())
     }
 
-    suspend fun eliminarActividad(id: Long): Result<Unit> {
-        return try {
-            apiService.eliminarActividad(id)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun eliminarActividad(id: Long) {
+        apiService.eliminarActividad(id)
     }
 }
