@@ -1,4 +1,7 @@
 
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroidSetup)
@@ -8,6 +11,13 @@ plugins {
 
 android {
     namespace = "com.example.miformacionctma"
+
+    val properties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        properties.load(localPropertiesFile.inputStream())
+    }
+    val apiKey = properties.getProperty("API_KEY") ?: ""
 
     compileSdk = 36
 
@@ -20,17 +30,35 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "API_KEY", "\"$apiKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = false
-
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api-dev.example.com/\"")
+        }
+        create("stage") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api-stage.example.com/\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            buildConfigField("String", "API_BASE_URL", "\"https://api.example.com/\"")
         }
     }
 
@@ -41,6 +69,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
