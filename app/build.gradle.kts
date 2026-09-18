@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlinAndroidSetup)
     alias(libs.plugins.kotlinComposeSetup)
     alias(libs.plugins.ksp)
+    kotlin("plugin.serialization") version libs.versions.kotlin.get()
 }
 
 android {
@@ -102,6 +103,13 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.kotlinx.serialization)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    implementation(libs.kotlinx.serialization.json)
 
     // Room 3
     implementation(libs.androidx.room3.runtime)
