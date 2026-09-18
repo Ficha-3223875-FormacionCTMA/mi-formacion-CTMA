@@ -1,9 +1,15 @@
 package com.example.miformacionctma.data.remote
 
+import android.content.ContentResolver
+import android.net.Uri
 import com.example.miformacionctma.data.mapper.toDomain
 import com.example.miformacionctma.data.mapper.toDto
 import com.example.miformacionctma.data.remote.api.ActividadApiService
 import com.example.miformacionctma.domain.ActividadFormativa
+import com.example.miformacionctma.domain.Evidencia
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.SocketTimeoutException
@@ -13,7 +19,8 @@ import java.net.SocketTimeoutException
  * Integra la lógica de Miguel con el contrato unificado.
  */
 class RemoteActividadDataSource(
-    private val apiService: ActividadApiService
+    private val apiService: ActividadApiService,
+    private val contentResolver: ContentResolver
 ) : ActividadRemoteDataSource {
 
     override suspend fun obtenerActividades(): List<ActividadFormativa> {
@@ -44,5 +51,30 @@ class RemoteActividadDataSource(
 
     override suspend fun eliminarActividad(id: Long) {
         apiService.eliminarActividad(id)
+    }
+
+    override suspend fun subirEvidencia(evidencia: Evidencia) {
+        try {
+            val uri = Uri.parse(evidencia.uri)
+            val inputStream = contentResolver.openInputStream(uri)
+                ?: throw Exception("No se pudo leer el archivo de la evidencia")
+            
+            val bytes = inputStream.use { it.readBytes() }
+            val requestFile = bytes.toRequestBody(evidencia.tipoMime.toMediaTypeOrNull())
+            
+            val body = MultipartBody.Part.createFormData(
+                "imagen",
+                "evidencia_${evidencia.actividadId}_${System.currentTimeMillis()}",
+                requestFile
+            )
+            
+            val actividadIdBody = evidencia.actividadId.toString()
+                .toRequestBody("text/plain".toMediaTypeOrNull())
+
+            apiService.subirEvidencia(actividadIdBody, body)
+        } catch (e: Exception) {
+            // Re-lanzar para que el repositorio maneje el estado FALLIDA
+            throw e
+        }
     }
 }

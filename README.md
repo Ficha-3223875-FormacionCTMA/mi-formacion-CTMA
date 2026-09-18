@@ -640,19 +640,36 @@ Se implementó la persistencia para adjuntos fotográficos relacionada con las a
 | `SINCRONIZADA` | Confirmada por el backend. |
 | `FALLIDA` | Error de red o validación (reintentable). |
 
-## 🛡️ 3. Matriz de Riesgos y Controles (Consolidado)
+## 🛡️ 3. Matriz de Riesgos y Controles (Transversal)
 
-| Riesgo | Impacto | Control / Mitigación |
-| :--- | :--- | :--- |
-| Exposición de `file://` URIs | Alto | Uso estricto de `content://` mediante FileProvider. |
-| Filtrado de tokens en Logcat | Crítico | Desactivación de logs de red en variante `release`. |
-| Tráfico en texto claro (HTTP) | Crítico | Configuración de `network_security_config.xml` forzando HTTPS. |
-| Fuga de memoria por URIs pesadas | Medio | Validación de tamaño máximo (5MB) antes del procesamiento. |
-| Acceso no autorizado a Galería | Bajo | Uso de `PickVisualMedia` (mínimo privilegio). |
-| Persistencia de datos sensibles | Alto | Almacenamiento exclusivo de URIs; nunca el binario de la imagen. |
-| Denegación de notificaciones | Medio | Flujo de solicitud `POST_NOTIFICATIONS` solo bajo demanda. |
-| Falta de integridad en migración | Alto | Pruebas instrumentadas de Room verificando esquema v3. |
+| Riesgo | Impacto | Control / Mitigación | Módulo Responsable |
+| :--- | :--- | :--- | :--- |
+| Archivos de imagen corruptos o no legibles | Alto | Validación de legibilidad mediante `ContentResolver.openFileDescriptor` antes de procesar el registro. | `EvidenciaRepository` |
+| Tamaño de evidencia superior a 5 MB | Medio | Verificación estricta del tamaño del archivo en bytes antes de iniciar el flujo de red. | `EvidenciaRepository` |
+| Tipos MIME no permitidos (ej. GIF, PDF) | Alto | Filtrado de extensiones aceptadas (`image/jpeg`, `image/png`, `image/webp`) vía `ContentResolver.getType`. | `EvidenciaRepository` |
+| Pérdida de conectividad durante envío multipart | Alto | Implementación de máquina de estados; la evidencia queda en estado `FALLIDA` en Room, nunca se elimina el archivo local. | `EvidenciaRepository` |
+| Errores de servidor (HTTP 5xx / 4xx) | Medio | Propagación de excepciones hacia el ViewModel y notificación al usuario mediante interfaz resiliente. | `RemoteActividadDataSource` |
+| Uso indebido de `file://` URIs | Alto | Uso obligatorio de `content://` URIs integrando `PickVisualMedia` y `FileProvider` para aislamiento de datos. | `Módulo Evidencias` |
+| Filtración de tokens o URIs en Logcat | Crítico | Configuración de interceptores de OkHttp para deshabilitar logs detallados en la variante `Release`. | `NetworkModule` |
+| Revocación de permisos `POST_NOTIFICATIONS` | Medio | Verificación dinámica de permisos en Android 13+ y manejo de estados degradados sin crash. | `Módulo Transversal` |
 
+## ⚙️ 4. Configuración de Ambientes y Políticas
+
+Para garantizar la integridad y seguridad de los datos, el proyecto implementa las siguientes políticas:
+
+*   **Ambientes (Flavors):**
+    *   `dev`: Conexión a servidores de desarrollo con logs de red habilitados.
+    *   `stage`: Ambiente de pre-producción para validación de criterios de aceptación.
+    *   `prod`: Ambiente final con optimizaciones de R8/ProGuard y seguridad máxima.
+*   **HTTPS Estricto:** Se prohíbe el tráfico de texto claro (HTTP) mediante `network_security_config.xml`. Todas las comunicaciones con el backend deben utilizar TLS 1.2+.
+
+## 🚀 5. Ejecución del Build de Producción
+
+Para generar el APK de producción optimizado, ejecute el siguiente comando en la terminal:
+
+```bash
+./gradlew assembleProdRelease
+```
 
 ---
 

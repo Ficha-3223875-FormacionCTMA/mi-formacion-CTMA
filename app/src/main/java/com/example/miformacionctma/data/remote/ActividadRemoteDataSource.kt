@@ -1,6 +1,7 @@
 package com.example.miformacionctma.data.remote
 
 import com.example.miformacionctma.domain.ActividadFormativa
+import com.example.miformacionctma.domain.Evidencia
 
 /**
  * Interfaz unificada para la integración con servicios web.
@@ -18,4 +19,9 @@ interface ActividadRemoteDataSource {
     suspend fun actualizarActividad(actividad: ActividadFormativa)
     
     suspend fun eliminarActividad(id: Long)
+
+    /**
+     * Sube una evidencia al servidor remoto.
+     */
+    suspend fun subirEvidencia(evidencia: Evidencia)
 }
