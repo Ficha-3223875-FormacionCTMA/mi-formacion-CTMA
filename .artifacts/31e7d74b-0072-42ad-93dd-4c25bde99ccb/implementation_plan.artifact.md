@@ -1,33 +1,32 @@
-# Plan de Limpieza de Dependencias (libs.versions.toml y build.gradle.kts)
+# Plan de Mejora de Visibilidad y Flujo de Evidencias (Guía #9)
 
-Este plan tiene como objetivo eliminar las duplicidades de librerías y versiones identificadas en el catálogo de versiones y en el archivo de construcción del módulo app, consolidando una única fuente de verdad y utilizando las versiones más estables y recientes.
+Este plan corrige la ausencia de la sección de captura de evidencias en la interfaz de usuario, asegurando que los controles de cámara y galería sean visibles y funcionales tanto en la vista de detalles como en la de edición.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> Se consolidarán las versiones de Retrofit (2.11.0) y Kotlinx Serialization (1.8.0). Se eliminarán las declaraciones duplicadas en el bloque `dependencies` de `app/build.gradle.kts`, priorizando el uso de los alias del catálogo de versiones sobre las cadenas de texto hardcodeadas.
+> - Se integrará la sección de evidencias en la pantalla de **Edición**, ya que es el lugar donde los usuarios suelen adjuntar archivos por primera vez.
+> - Se mejorará la robustez de la pantalla de **Detalle** para asegurar que la información se cargue correctamente incluso si el estado global de la lista está en transición.
 
 ## Proposed Changes
 
-### Catálogo de Versiones
+### 1. Capa de Presentación (ViewModel)
 
-#### [MODIFY] [libs.versions.toml](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/gradle/libs.versions.toml)
-- Consolidar la sección `[versions]`, eliminando las definiciones duplicadas de `retrofit`, `okhttp` y `kotlinxSerialization`.
-- Limpiar la sección `[libraries]`, eliminando las definiciones duplicadas de los componentes de Networking (Retrofit, OkHttp, etc.).
-- Organizar las librerías por categorías lógicas.
+#### [MODIFY] [ActividadViewModel.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/main/java/com/example/miformacionctma/ui/actividad/ActividadViewModel.kt)
+- Añadir un flujo reactivo para obtener una única actividad por ID (`val actividadSeleccionada`).
+- Asegurar que al seleccionar una actividad, se carguen tanto sus datos básicos como sus evidencias de forma coordinada.
 
-### Configuración del Módulo App
+### 2. Interfaz de Usuario (Compose)
 
-#### [MODIFY] [build.gradle.kts (app)](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/build.gradle.kts)
-- Eliminar el bloque duplicado de "Servicios web" que repite las dependencias de "Networking".
-- Eliminar la declaración duplicada de "DataStore".
-- Reemplazar las dependencias de prueba hardcodeadas (JUnit, Coroutines Test, MockK) por sus equivalentes del catálogo de versiones (`libs.*`).
+#### [MODIFY] [navegacion.kt](file:///C:/Users/MiguelFormacion.LenovoLOQ_MIGAN/AndroidStudioProjects/MiFormacionCTMA/app/src/main/java/com/example/miformacionctma/ui/navegacion.kt)
+- **EditarRoute / FormularioActividad:** Integrar el componente `EvidenciaSection`. Esto permitirá adjuntar fotos mientras se editan otros campos de la actividad.
+- **DetalleRoute:** Utilizar el nuevo flujo `actividadSeleccionada` del ViewModel para evitar que la pantalla se muestre vacía si la lista global no ha terminado de cargar.
+- **ListaRoute:** Asegurar que el clic en la tarjeta (Card) y el botón "Editar detalles" lleven a experiencias consistentes.
 
 ## Verification Plan
 
-### Automated Tests
-- Ejecutar `./gradlew test` para asegurar que las librerías de prueba siguen funcionando correctamente tras la migración al catálogo.
-
 ### Manual Verification
-- Realizar un **Gradle Sync** para confirmar que no hay conflictos de nombres o versiones.
-- Ejecutar la aplicación para verificar que la capa de red (Retrofit) y la persistencia (Room/DataStore) operan normalmente.
+1. Abrir la app y hacer clic en una actividad de la lista ➔ La sección de evidencias debe ser visible al final del scroll.
+2. Hacer clic en "Editar detalles" ➔ La sección de evidencias debe aparecer también en el formulario de edición.
+3. Capturar una foto ➔ Verificar que aparece la miniatura en ambas pantallas (Detalle y Edición).
+4. Reiniciar la app ➔ Confirmar que las evidencias persistieron en Room.

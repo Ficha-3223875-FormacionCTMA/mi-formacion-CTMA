@@ -4,7 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.data.repository.ActividadRepository
+import com.example.miformacionctma.data.repository.EvidenciaRepository
 import com.example.miformacionctma.data.repository.PreferenciasRepository
+import com.example.miformacionctma.domain.Evidencia
+import com.example.miformacionctma.domain.EstadoEvidencia
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -12,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
@@ -23,6 +27,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class ActividadViewModel(
     private val repository: ActividadRepository,
+    private val evidenciaRepository: EvidenciaRepository,
     private val preferencias: PreferenciasRepository
 ) : ViewModel() {
 
@@ -40,6 +45,19 @@ class ActividadViewModel(
 
     private val _estaSincronizando = MutableStateFlow(false)
     val estaSincronizando = _estaSincronizando.asStateFlow()
+
+    private val _idActividadSeleccionada = MutableStateFlow<Long?>(null)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val evidencias: StateFlow<List<Evidencia>> =
+        _idActividadSeleccionada.flatMapLatest { id ->
+            if (id == null) flowOf(emptyList())
+            else evidenciaRepository.obtenerPorActividad(id)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList()
+        )
 
     private var refreshJob: Job? = null
 
@@ -168,5 +186,40 @@ class ActividadViewModel(
     
     fun resetearEstadoOperacion() {
         _operacionState.value = OperacionUiState.Inactiva
+    }
+
+    fun seleccionarActividad(id: Long?) {
+        _idActividadSeleccionada.value = id
+    }
+
+    fun adjuntarEvidencia(uri: String, tipoMime: String, tamanio: Long) {
+        val actividadId = _idActividadSeleccionada.value ?: return
+        viewModelScope.launch {
+            _operacionState.value = OperacionUiState.EnCurso
+            try {
+                val evidencia = Evidencia(
+                    actividadId = actividadId,
+                    uri = uri,
+                    tipoMime = tipoMime,
+                    tamanio = tamanio
+                )
+                evidenciaRepository.adjuntar(evidencia)
+                _operacionState.value = OperacionUiState.Exitosa
+            } catch (e: Exception) {
+                _operacionState.value = OperacionUiState.Fallida(e.message ?: "Error al adjuntar evidencia")
+            }
+        }
+    }
+
+    fun eliminarEvidencia(evidencia: Evidencia) {
+        viewModelScope.launch {
+            _operacionState.value = OperacionUiState.EnCurso
+            try {
+                evidenciaRepository.eliminar(evidencia)
+                _operacionState.value = OperacionUiState.Exitosa
+            } catch (e: Exception) {
+                _operacionState.value = OperacionUiState.Fallida(e.message ?: "Error al eliminar evidencia")
+            }
+        }
     }
 }
