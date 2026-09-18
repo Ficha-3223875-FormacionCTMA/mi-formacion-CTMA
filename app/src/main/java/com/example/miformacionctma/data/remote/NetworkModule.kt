@@ -11,7 +11,7 @@ import kotlinx.serialization.json.Json
 
 object NetworkModule {
 
-    private const val BASE_URL = "https://dummyjson.com/"
+    private const val BASE_URL = "https://e8512387-d5c5-4a51-b5b8-72604db1eb0b.mock.pstmn.io/"
 
     private val json = Json {
         ignoreUnknownKeys = true

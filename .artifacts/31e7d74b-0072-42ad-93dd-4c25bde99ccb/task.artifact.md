@@ -1,9 +1,5 @@
-- `[x]` Crear paquetes `data/remote/dto`, `data/remote/api`, `data/remote/auth`
-- `[x]` Implementar `ActividadDto.kt` con `@Serializable`
-- `[x]` Actualizar `ActividadMapper.kt` con mapeos DTO -> Entity
-- `[x]` Configurar `NetworkModule.kt` (Retrofit + OkHttp)
-- `[x]` Definir interface `ActividadApiService.kt`
-- `[x]` Implementar `RemoteActividadDataSource.kt` con clasificación de errores
-- `[x]` Actualizar `ActividadRepository.kt` para integrar el flujo de red (Refresh)
-- `[x]` Implementar `TokenProvider.kt`
-- `[x]` Actualizar README con diagrama de arquitectura técnica
+- `[ ]` Implementar flujo `estaSincronizando` en `ActividadViewModel.kt`
+- `[ ]` Integrar `LinearProgressIndicator` en `navegacion.kt`
+- `[ ]` Añadir Matriz Riesgo-Respuesta en el `README.md`
+- `[ ]` Documentar los 8 escenarios de prueba en el `README.md`
+- `[ ]` Verificar funcionamiento con tests unitarios
