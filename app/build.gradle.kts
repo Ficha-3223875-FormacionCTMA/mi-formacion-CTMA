@@ -1,13 +1,14 @@
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroidSetup)
     alias(libs.plugins.kotlinComposeSetup)
     alias(libs.plugins.ksp)
-    jacoco
 }
 
 android {
     namespace = "com.example.miformacionctma"
+
     compileSdk = 36
 
     defaultConfig {
@@ -23,10 +24,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            enableUnitTestCoverage = true
-            enableAndroidTestCoverage = true
-        }
         release {
             isMinifyEnabled = false
 
@@ -45,37 +42,6 @@ android {
     buildFeatures {
         compose = true
     }
-
-    testOptions {
-        unitTests.all {
-            it.useJUnitPlatform()
-        }
-    }
-}
-
-val jacocoTestReport by tasks.registering(JacocoReport::class) {
-    dependsOn("testDebugUnitTest")
-    reports {
-        xml.required.set(true)
-        html.required.set(true)
-    }
-
-    val fileFilter = listOf(
-        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-        "**/*Test*.*", "android/**/*.*", "**/*_Impl*.*", "**/*Dao*.*",
-        "**/*Entity*.*", "**/*Mapper*.*", "**/DatabaseProvider*.*",
-        "**/*Activity*.*", "**/ui/theme/**"
-    )
-    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-        exclude(fileFilter)
-    }
-    val mainSrc = "${project.projectDir}/src/main/java"
-
-    sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
-    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
-    })
 }
 
 kotlin {
@@ -87,6 +53,7 @@ kotlin {
 }
 
 dependencies {
+
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -107,7 +74,7 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Room
+    // Room 3
     implementation(libs.androidx.room3.runtime)
     ksp(libs.androidx.room3.compiler)
 
@@ -116,12 +83,15 @@ dependencies {
     implementation(libs.androidx.sqlite.ktx)
     implementation(libs.androidx.sqlite.framework)
 
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
+
     // Pruebas unitarias
     testImplementation(libs.junit)
-    testImplementation(libs.junit.jupiter)
     testImplementation(kotlin("test"))
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
 
     // Pruebas Android
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -134,3 +104,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
+
