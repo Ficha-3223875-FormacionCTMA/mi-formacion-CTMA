@@ -5,4 +5,7 @@
     <external-files-path
         name="evidencias"
         path="evidencias/" />
+    <cache-path
+        name="cache_evidencias"
+        path="evidencias/" />
 </paths>

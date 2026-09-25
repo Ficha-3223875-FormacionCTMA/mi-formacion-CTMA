@@ -622,6 +622,23 @@ fun DetalleRoute(
         }
     }
 
+    // Launcher para Permiso de Cámara
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val file = File(context.cacheDir, "evidencias").apply { mkdirs() }
+            val imageFile = File(file, "temp_${System.currentTimeMillis()}.jpg")
+            val uri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                imageFile
+            )
+            tempUri = uri
+            cameraLauncher.launch(uri)
+        }
+    }
+
     val estado = if (actividad != null) EstadoDetalle.Encontrada(actividad) else EstadoDetalle.NoEncontrada
     
     when (estado) {
@@ -631,15 +648,20 @@ fun DetalleRoute(
                 evidencias = evidencias,
                 onVolver = onVolver,
                 onCapturarFoto = {
-                    val file = File(context.cacheDir, "evidencias").apply { mkdirs() }
-                    val imageFile = File(file, "temp_${System.currentTimeMillis()}.jpg")
-                    val uri = FileProvider.getUriForFile(
-                        context,
-                        "${context.packageName}.fileprovider",
-                        imageFile
-                    )
-                    tempUri = uri
-                    cameraLauncher.launch(uri)
+                    val permission = android.Manifest.permission.CAMERA
+                    if (androidx.core.content.ContextCompat.checkSelfPermission(context, permission) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        val file = File(context.cacheDir, "evidencias").apply { mkdirs() }
+                        val imageFile = File(file, "temp_${System.currentTimeMillis()}.jpg")
+                        val uri = FileProvider.getUriForFile(
+                            context,
+                            "${context.packageName}.fileprovider",
+                            imageFile
+                        )
+                        tempUri = uri
+                        cameraLauncher.launch(uri)
+                    } else {
+                        permissionLauncher.launch(permission)
+                    }
                 },
                 onSeleccionarGaleria = {
                     galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
