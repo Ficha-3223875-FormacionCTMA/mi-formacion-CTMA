@@ -41,6 +41,7 @@ import com.example.miformacionctma.data.remote.NetworkModule
 import com.example.miformacionctma.data.remote.RemoteActividadDataSource
 import com.example.miformacionctma.data.remote.api.ActividadApiService
 import com.example.miformacionctma.data.repository.ActividadRepository
+import com.example.miformacionctma.data.repository.EvidenciaRepositoryImpl
 import com.example.miformacionctma.data.repository.PreferenciasRepository
 import com.example.miformacionctma.domain.ActividadFormativa
 import com.example.miformacionctma.domain.Prioridad
@@ -78,8 +79,15 @@ class MainActivity : ComponentActivity() {
             remoteDataSource = remoteDataSource
         )
 
+        val evidenciaRepository = EvidenciaRepositoryImpl(
+            evidenciaDao = database.evidenciaDao(),
+            remoteDataSource = remoteDataSource,
+            contentResolver = contentResolver
+        )
+
         val factory = ActividadViewModelFactory(
             repository,
+            evidenciaRepository,
             preferenciasRepository
         )
 

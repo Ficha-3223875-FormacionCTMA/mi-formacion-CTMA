@@ -1,4 +1,5 @@
-- `[ ]` Limpiar `libs.versions.toml` (Consolidar versiones y librerías)
-- `[ ]` Limpiar `app/build.gradle.kts` (Eliminar duplicados y usar catálogo en tests)
-- `[ ]` Sincronizar Gradle
-- `[ ]` Ejecutar pruebas unitarias para verificar estabilidad
+- `[ ]` Implementar `actividadSeleccionada` Flow en `ActividadViewModel.kt`
+- `[ ]` Integrar `EvidenciaSection` en `FormularioActividad` (navegacion.kt)
+- `[ ]` Actualizar lógica de `DetalleRoute` para usar el nuevo flujo del ViewModel
+- `[ ]` Verificar visibilidad y scroll en la pantalla de detalles
+- `[ ]` Validar persistencia de evidencias tras captura

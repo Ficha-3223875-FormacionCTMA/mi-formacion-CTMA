@@ -87,6 +87,19 @@ fun SelectorEvidenciaFoto(
         }
     }
 
+    // Solicitud de permiso de cámara en tiempo de ejecución
+    val lanzadorPermisoCamara = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) {
+            val uri = crearUriFoto(contexto)
+            if (uri != null) {
+                uriCamara = uri
+                lanzadorCamara.launch(uri)
+            }
+        }
+    }
+
     val uriActual = uriFoto?.let { Uri.parse(it) }
 
     Column(
@@ -116,10 +129,15 @@ fun SelectorEvidenciaFoto(
 
                 OutlinedButton(
                     onClick = {
-                        val uri = crearUriFoto(contexto)
-                        if (uri != null) {
-                            uriCamara = uri
-                            lanzadorCamara.launch(uri)
+                        val permiso = android.Manifest.permission.CAMERA
+                        if (androidx.core.content.ContextCompat.checkSelfPermission(contexto, permiso) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                            val uri = crearUriFoto(contexto)
+                            if (uri != null) {
+                                uriCamara = uri
+                                lanzadorCamara.launch(uri)
+                            }
+                        } else {
+                            lanzadorPermisoCamara.launch(permiso)
                         }
                     },
                     modifier = Modifier.weight(1f)
